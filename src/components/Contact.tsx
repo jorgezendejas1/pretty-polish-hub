@@ -48,7 +48,7 @@ export const Contact = () => {
               </div>
               <h3 className="font-display font-semibold mb-2">Email</h3>
               <p className="text-sm text-muted-foreground">
-                info@luxenails.com
+                info@pitayanails.com
               </p>
             </CardContent>
           </Card>
