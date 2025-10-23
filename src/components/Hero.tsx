@@ -1,8 +1,11 @@
+import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Calendar } from "lucide-react";
 import heroImage from "@/assets/hero-nails.jpg";
 
 export const Hero = () => {
+  const navigate = useNavigate();
+
   return (
     <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
       <div 
@@ -24,7 +27,8 @@ export const Hero = () => {
           Studio de uñas premium donde el arte se encuentra con la elegancia
         </p>
         <Button 
-          size="lg" 
+          size="lg"
+          onClick={() => navigate('/servicios')}
           className="gradient-primary text-white hover:shadow-glow transition-smooth text-lg px-8 py-6 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300"
         >
           <Calendar className="mr-2 h-5 w-5" />
