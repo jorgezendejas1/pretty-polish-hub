@@ -202,22 +202,22 @@ export const BEFORE_AFTER_IMAGES: BeforeAfterImage[] = [
 
 export const SALON_INFO = {
   name: 'Pitaya Nails',
-  address: 'Av. Bonampak 123, Cancún, Q.R., México',
-  phone: '+52 998 123 4567',
+  address: 'Jardines del Sur 5, Cancún, Quintana Roo, C.P. 77536',
+  phone: '+52 998 112 3411',
   email: 'info@pitayanails.com',
   hours: {
-    weekdays: '10:00 AM - 8:00 PM',
-    saturday: '10:00 AM - 6:00 PM',
-    sunday: 'Cerrado',
+    weekdays: 'Lun - Sab: 10:00 AM - 8:00 PM',
+    saturday: 'Lun - Sab: 10:00 AM - 8:00 PM',
+    sunday: 'Domingo: Cerrado',
   },
   coordinates: {
-    lat: 21.161908,
-    lng: -86.851528,
+    lat: 21.086719,
+    lng: -86.876999,
   },
   social: {
-    instagram: 'https://instagram.com/pitayanails',
-    facebook: 'https://facebook.com/pitayanails',
-    whatsapp: 'https://wa.me/5219981234567',
+    instagram: 'https://instagram.com/nailstation_cun',
+    facebook: 'https://www.facebook.com/share/17VY8FsYCU/?mibextid=wwXIfr',
+    whatsapp: 'https://wa.me/5219981123411',
   },
 };
 
