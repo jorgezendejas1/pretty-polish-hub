@@ -23,6 +23,9 @@ export const Header = () => {
     { name: 'Portafolio', path: '/portafolio' },
     { name: 'Antes/Después', path: '/transformaciones' },
     { name: 'Equipo', path: '/equipo' },
+    { name: 'Nosotros', path: '/sobre-nosotros' },
+    { name: 'Certificaciones', path: '/certificaciones' },
+    { name: 'Editor IA', path: '/editor' },
     { name: 'Contacto', path: '/contacto' },
   ];
 
@@ -54,7 +57,7 @@ export const Header = () => {
 
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center space-x-8">
-              {navLinks.map((link) => (
+              {navLinks.slice(0, 6).map((link) => (
                 <Link
                   key={link.path}
                   to={link.path}
@@ -120,7 +123,7 @@ export const Header = () => {
             className="fixed inset-0 bg-black/50 z-40 lg:hidden"
             onClick={() => setIsMobileMenuOpen(false)}
           />
-          <div className="fixed top-0 left-0 w-80 h-full bg-background z-50 lg:hidden shadow-elegant transform transition-smooth">
+          <div className="fixed top-0 left-0 w-80 h-full bg-background z-50 lg:hidden shadow-elegant transform transition-smooth overflow-y-auto">
             <div className="p-6">
               <div className="flex items-center justify-between mb-8">
                 <Link

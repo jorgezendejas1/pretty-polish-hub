@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { SERVICES } from '@/lib/constants';
 import { Service } from '@/types';
 import { ServiceCard } from '@/components/ServiceCard';
+import { BookingFlow } from '@/components/BookingFlow';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -16,6 +17,7 @@ const Services = () => {
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [priceRange, setPriceRange] = useState<string>('all');
+  const [showBookingFlow, setShowBookingFlow] = useState(false);
 
   useEffect(() => {
     const serviceId = searchParams.get('service');
@@ -54,9 +56,20 @@ const Services = () => {
   const totalDuration = selectedServices.reduce((sum, service) => sum + service.duration, 0);
 
   const startBooking = () => {
-    localStorage.setItem('bookingServices', JSON.stringify(selectedServices));
-    navigate('/reserva');
+    if (selectedServices.length === 0) return;
+    setShowBookingFlow(true);
   };
+
+  if (showBookingFlow) {
+    return (
+      <div className="min-h-screen pt-24 pb-12">
+        <BookingFlow
+          initialServices={selectedServices}
+          onBack={() => setShowBookingFlow(false)}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen pt-24 pb-12">

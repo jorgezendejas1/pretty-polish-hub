@@ -21,9 +21,8 @@ export const Footer = () => {
               <div className="flex items-start space-x-2">
                 <Clock className="h-4 w-4 mt-1 flex-shrink-0" />
                 <div>
-                  <p>Lun - Vie: {SALON_INFO.hours.weekdays}</p>
-                  <p>Sábado: {SALON_INFO.hours.saturday}</p>
-                  <p>Domingo: {SALON_INFO.hours.sunday}</p>
+                  <p>{SALON_INFO.hours.weekdays}</p>
+                  <p>{SALON_INFO.hours.sunday}</p>
                 </div>
               </div>
             </div>
@@ -69,10 +68,26 @@ export const Footer = () => {
               </li>
               <li>
                 <Link
-                  to="/nosotros"
+                  to="/sobre-nosotros"
                   className="text-muted-foreground hover:text-primary transition-smooth"
                 >
-                  Acerca de Nosotros
+                  Nosotros
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/certificaciones"
+                  className="text-muted-foreground hover:text-primary transition-smooth"
+                >
+                  Certificaciones
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/editor"
+                  className="text-muted-foreground hover:text-primary transition-smooth"
+                >
+                  Editor IA
                 </Link>
               </li>
               <li>
