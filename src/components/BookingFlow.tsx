@@ -155,7 +155,7 @@ export const BookingFlow = ({ initialServices, onBack }: BookingFlowProps) => {
   const handleSubmit = async () => {
     setIsSubmitting(true);
     try {
-      const { error } = await supabase.from('bookings').insert([{
+      const bookingData = {
         client_name: bookingState.clientData.name,
         client_email: bookingState.clientData.email,
         client_phone: bookingState.clientData.phone,
@@ -168,19 +168,38 @@ export const BookingFlow = ({ initialServices, onBack }: BookingFlowProps) => {
         total_price: totalPrice,
         total_duration: totalDuration,
         customizations: bookingState.customizations as any,
-      }]);
+      };
 
-      if (error) throw error;
+      // Use the secure endpoint with validation
+      const response = await supabase.functions.invoke('create-booking', {
+        body: bookingData
+      });
 
-      // Guardar en historial local
+      if (response.error) {
+        throw new Error(response.error.message || 'Error al crear la reserva');
+      }
+
+      if (!response.data?.success) {
+        const errorDetails = response.data?.details ? ` (${response.data.details.join(', ')})` : '';
+        throw new Error(response.data?.error + errorDetails || 'Error al crear la reserva');
+      }
+
+      const booking = response.data.booking;
+      const bookingToken = response.data.booking_token;
+
+      // Store booking token for future retrieval
+      localStorage.setItem(`booking_token_${booking.id}`, bookingToken);
+
+      // Guardar en historial local con token
       const history = JSON.parse(localStorage.getItem('bookingHistory') || '[]');
       history.push({
-        id: Date.now().toString(),
+        id: booking.id,
         date: format(bookingState.selectedDate!, 'dd/MM/yyyy', { locale: es }),
         services: bookingState.selectedServices,
         professionalName: bookingState.selectedProfessional?.name || '',
         totalPrice,
         totalDuration,
+        booking_token: bookingToken,
       });
       localStorage.setItem('bookingHistory', JSON.stringify(history));
 
@@ -191,11 +210,11 @@ export const BookingFlow = ({ initialServices, onBack }: BookingFlowProps) => {
         title: '¡Reserva confirmada!',
         description: 'Te enviaremos un correo de confirmación pronto',
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error al crear reserva:', error);
       toast({
         title: 'Error',
-        description: 'Hubo un problema al procesar tu reserva. Intenta de nuevo.',
+        description: error.message || 'Hubo un problema al procesar tu reserva. Intenta de nuevo.',
         variant: 'destructive',
       });
     } finally {

@@ -1,8 +1,31 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.75.1";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+// Rate limiting helper
+const checkRateLimit = async (supabase: any, identifier: string): Promise<boolean> => {
+  try {
+    const { data, error } = await supabase.rpc('check_rate_limit', {
+      p_identifier: identifier,
+      p_endpoint: 'chat',
+      p_max_requests: 30,
+      p_window_seconds: 3600 // 30 requests per hour
+    });
+    
+    if (error) {
+      console.error('Rate limit check error:', error);
+      return true; // Allow on error
+    }
+    
+    return data === true;
+  } catch (error) {
+    console.error('Rate limit exception:', error);
+    return true;
+  }
 };
 
 serve(async (req) => {
@@ -11,6 +34,24 @@ serve(async (req) => {
   }
 
   try {
+    // Rate limiting check
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+    
+    const clientIP = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
+    const rateLimitPassed = await checkRateLimit(supabase, clientIP);
+    
+    if (!rateLimitPassed) {
+      return new Response(
+        JSON.stringify({ error: 'Demasiadas solicitudes. Por favor intenta más tarde.' }),
+        {
+          status: 429,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
+    }
+
     const { messages } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     
