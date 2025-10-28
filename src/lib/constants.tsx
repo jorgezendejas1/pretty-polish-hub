@@ -86,7 +86,7 @@ export const SERVICES: Service[] = [
 export const TEAM_MEMBERS: TeamMember[] = [
   {
     id: 'lily',
-    name: 'Lily Rodríguez',
+    name: 'Lily',
     role: 'Nail Artist Principal',
     specialty: 'Especialista en Nail Art y Diseños 3D',
     imageUrl: gallery1,
@@ -94,7 +94,7 @@ export const TEAM_MEMBERS: TeamMember[] = [
   },
   {
     id: 'sofia',
-    name: 'Sofía Martínez',
+    name: 'Sofía',
     role: 'Técnica en Uñas',
     specialty: 'Experta en Uñas Esculturales',
     imageUrl: gallery2,
@@ -102,7 +102,7 @@ export const TEAM_MEMBERS: TeamMember[] = [
   },
   {
     id: 'ana',
-    name: 'Ana López',
+    name: 'Ana',
     role: 'Manicurista',
     specialty: 'Manicura y Pedicura Spa',
     imageUrl: gallery3,

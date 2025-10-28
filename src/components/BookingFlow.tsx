@@ -348,6 +348,55 @@ END:VCALENDAR`;
         </Card>
       )}
 
+      {/* Paso 1: Profesional */}
+      {currentStep === 1 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Selecciona tu profesional</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-4">
+              {TEAM_MEMBERS.map((member) => (
+                <Card
+                  key={member.id}
+                  className={`cursor-pointer transition-all ${
+                    bookingState.selectedProfessional?.id === member.id
+                      ? 'ring-2 ring-primary'
+                      : 'hover:shadow-md'
+                  }`}
+                  onClick={() =>
+                    setBookingState({ ...bookingState, selectedProfessional: member })
+                  }
+                >
+                  <CardContent className="flex items-center gap-4 p-4">
+                    <img
+                      src={member.imageUrl}
+                      alt={member.name}
+                      className="w-16 h-16 rounded-full object-cover"
+                    />
+                    <div className="flex-1">
+                      <h3 className="font-semibold">{member.name}</h3>
+                      <p className="text-sm text-primary">{member.role}</p>
+                      <p className="text-xs text-muted-foreground">{member.specialty}</p>
+                    </div>
+                    {bookingState.selectedProfessional?.id === member.id && (
+                      <Check className="h-6 w-6 text-primary" />
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+            <Button
+              onClick={handleNext}
+              disabled={!bookingState.selectedProfessional}
+              className="w-full gradient-primary text-white"
+            >
+              Continuar
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Paso 2: Fecha y Hora */}
       {currentStep === 2 && (
         <Card>
