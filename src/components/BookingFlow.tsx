@@ -155,6 +155,14 @@ export const BookingFlow = ({ initialServices, onBack }: BookingFlowProps) => {
   const handleSubmit = async () => {
     setIsSubmitting(true);
     try {
+      // Collect all inspiration images from customizations
+      const inspirationImages: string[] = [];
+      Object.values(bookingState.customizations).forEach((customization: any) => {
+        if (customization?.images && Array.isArray(customization.images)) {
+          inspirationImages.push(...customization.images);
+        }
+      });
+
       const bookingData = {
         client_name: bookingState.clientData.name,
         client_email: bookingState.clientData.email,
@@ -168,6 +176,7 @@ export const BookingFlow = ({ initialServices, onBack }: BookingFlowProps) => {
         total_price: totalPrice,
         total_duration: totalDuration,
         customizations: bookingState.customizations as any,
+        inspiration_images: inspirationImages,
       };
 
       // Use the secure endpoint with validation
@@ -336,6 +345,123 @@ END:VCALENDAR`;
                         className="mt-2"
                         placeholder="Describe el diseño que deseas..."
                       />
+                    </div>
+                    <div>
+                      <Label>Imágenes de inspiración (opcional)</Label>
+                      <div className="mt-2 space-y-2">
+                        <input
+                          type="file"
+                          accept="image/jpeg,image/jpg,image/png,image/webp"
+                          multiple
+                          onChange={async (e) => {
+                            const files = Array.from(e.target.files || []);
+                            if (files.length === 0) return;
+                            
+                            const currentImages = bookingState.customizations[service.id]?.images || [];
+                            if (currentImages.length + files.length > 3) {
+                              toast({
+                                title: 'Límite excedido',
+                                description: 'Puedes subir máximo 3 imágenes',
+                                variant: 'destructive',
+                              });
+                              return;
+                            }
+
+                            try {
+                              const uploadedUrls: string[] = [];
+                              
+                              for (const file of files) {
+                                if (file.size > 5 * 1024 * 1024) {
+                                  toast({
+                                    title: 'Archivo muy grande',
+                                    description: 'Las imágenes deben ser menores a 5MB',
+                                    variant: 'destructive',
+                                  });
+                                  continue;
+                                }
+                                
+                                const fileExt = file.name.split('.').pop();
+                                const fileName = `${Math.random()}.${fileExt}`;
+                                const filePath = `${fileName}`;
+
+                                const { error: uploadError } = await supabase.storage
+                                  .from('design-inspirations')
+                                  .upload(filePath, file);
+
+                                if (uploadError) {
+                                  console.error('Upload error:', uploadError);
+                                  toast({
+                                    title: 'Error al subir',
+                                    description: 'No se pudo subir la imagen',
+                                    variant: 'destructive',
+                                  });
+                                  continue;
+                                }
+
+                                const { data: { publicUrl } } = supabase.storage
+                                  .from('design-inspirations')
+                                  .getPublicUrl(filePath);
+
+                                uploadedUrls.push(publicUrl);
+                              }
+
+                              setBookingState({
+                                ...bookingState,
+                                customizations: {
+                                  ...bookingState.customizations,
+                                  [service.id]: {
+                                    ...bookingState.customizations[service.id],
+                                    images: [...currentImages, ...uploadedUrls],
+                                  },
+                                },
+                              });
+
+                              toast({
+                                title: 'Imágenes subidas',
+                                description: `${uploadedUrls.length} imagen(es) subida(s) exitosamente`,
+                              });
+                            } catch (error) {
+                              console.error('Error:', error);
+                              toast({
+                                title: 'Error',
+                                description: 'Ocurrió un error al subir las imágenes',
+                                variant: 'destructive',
+                              });
+                            }
+                          }}
+                          className="block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90 cursor-pointer"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Sube hasta 3 imágenes (máx. 5MB c/u) del diseño que deseas
+                        </p>
+                        {bookingState.customizations[service.id]?.images && bookingState.customizations[service.id].images.length > 0 && (
+                          <div className="grid grid-cols-3 gap-2 mt-4">
+                            {bookingState.customizations[service.id].images.map((url: string, idx: number) => (
+                              <div key={idx} className="relative aspect-square rounded-lg overflow-hidden border">
+                                <img src={url} alt={`Inspiración ${idx + 1}`} className="w-full h-full object-cover" />
+                                <button
+                                  onClick={() => {
+                                    const currentImages = bookingState.customizations[service.id]?.images || [];
+                                    setBookingState({
+                                      ...bookingState,
+                                      customizations: {
+                                        ...bookingState.customizations,
+                                        [service.id]: {
+                                          ...bookingState.customizations[service.id],
+                                          images: currentImages.filter((_: string, i: number) => i !== idx),
+                                        },
+                                      },
+                                    });
+                                  }}
+                                  className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-destructive/90"
+                                >
+                                  ×
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 )}

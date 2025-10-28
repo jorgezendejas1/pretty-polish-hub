@@ -25,6 +25,7 @@ export type Database = {
           created_at: string
           customizations: Json | null
           id: string
+          inspiration_images: string[] | null
           professional_id: string
           professional_name: string
           service_ids: string[]
@@ -43,6 +44,7 @@ export type Database = {
           created_at?: string
           customizations?: Json | null
           id?: string
+          inspiration_images?: string[] | null
           professional_id: string
           professional_name: string
           service_ids: string[]
@@ -61,6 +63,7 @@ export type Database = {
           created_at?: string
           customizations?: Json | null
           id?: string
+          inspiration_images?: string[] | null
           professional_id?: string
           professional_name?: string
           service_ids?: string[]

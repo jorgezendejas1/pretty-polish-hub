@@ -143,7 +143,8 @@ serve(async (req) => {
       customizations: bookingData.customizations ? {
         ...bookingData.customizations,
         notes: bookingData.customizations.notes?.trim().substring(0, 500)
-      } : null
+      } : null,
+      inspiration_images: bookingData.inspiration_images || []
     };
     
     // Insert booking with service role (bypasses RLS)

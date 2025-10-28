@@ -34,16 +34,6 @@ export const Chatbot = () => {
     if (!input.trim() || isLoading) return;
 
     const userMessage = input.trim();
-    
-    // Validate message length
-    if (userMessage.length > 500) {
-      toast({
-        title: 'Mensaje muy largo',
-        description: 'Por favor limita tu mensaje a 500 caracteres',
-        variant: 'destructive',
-      });
-      return;
-    }
     setInput('');
     
     const newMessages = [...messages, { role: 'user' as const, content: userMessage }];
