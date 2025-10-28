@@ -53,6 +53,19 @@ serve(async (req) => {
     }
 
     const { messages } = await req.json();
+    
+    // Validate message length (last user message)
+    const lastUserMessage = messages[messages.length - 1];
+    if (lastUserMessage?.content?.length > 500) {
+      return new Response(
+        JSON.stringify({ error: 'Mensaje demasiado largo. Por favor limita tu mensaje a 500 caracteres.' }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
+    }
+    
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     
     if (!LOVABLE_API_KEY) {
