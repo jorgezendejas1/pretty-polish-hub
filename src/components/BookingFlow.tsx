@@ -212,12 +212,31 @@ export const BookingFlow = ({ initialServices, onBack }: BookingFlowProps) => {
       });
       localStorage.setItem('bookingHistory', JSON.stringify(history));
 
+      // Send confirmation email
+      try {
+        await supabase.functions.invoke('send-booking-confirmation', {
+          body: {
+            email: bookingState.clientData.email,
+            name: bookingState.clientData.name,
+            bookingDate: format(bookingState.selectedDate!, 'dd/MM/yyyy', { locale: es }),
+            bookingTime: bookingState.selectedTime,
+            services: bookingState.selectedServices.map(s => s.name),
+            professionalName: bookingState.selectedProfessional?.name || '',
+            totalPrice,
+            totalDuration,
+          }
+        });
+      } catch (emailError) {
+        console.error('Error sending email:', emailError);
+        // Don't fail the booking if email fails
+      }
+
       setCurrentStep(6);
       localStorage.removeItem('bookingState');
 
       toast({
         title: '¡Reserva confirmada!',
-        description: 'Te enviaremos un correo de confirmación pronto',
+        description: 'Te hemos enviado un correo de confirmación',
       });
     } catch (error: any) {
       console.error('Error al crear reserva:', error);
@@ -301,8 +320,8 @@ END:VCALENDAR`;
             {bookingState.selectedServices.map((service) => (
               <div key={service.id} className="border-b pb-6 last:border-b-0">
                 <h3 className="font-semibold text-lg mb-2">{service.name}</h3>
-                {service.isCustomizable && (
-                  <div className="space-y-4">
+                <div className="space-y-4">
+                  {service.isCustomizable && (
                     <div>
                       <Label>{service.customizationPrompt}</Label>
                       <Input
@@ -326,145 +345,147 @@ END:VCALENDAR`;
                         className="mt-2"
                       />
                     </div>
-                    <div>
-                      <Label>Notas adicionales (opcional)</Label>
-                      <Textarea
-                        value={bookingState.customizations[service.id]?.notes || ''}
-                        onChange={(e) => {
-                          setBookingState({
-                            ...bookingState,
-                            customizations: {
-                              ...bookingState.customizations,
-                              [service.id]: {
-                                ...bookingState.customizations[service.id],
-                                notes: e.target.value,
-                              },
+                  )}
+                  <div>
+                    <Label>Notas adicionales (opcional)</Label>
+                    <Textarea
+                      value={bookingState.customizations[service.id]?.notes || ''}
+                      onChange={(e) => {
+                        setBookingState({
+                          ...bookingState,
+                          customizations: {
+                            ...bookingState.customizations,
+                            [service.id]: {
+                              ...bookingState.customizations[service.id],
+                              notes: e.target.value,
                             },
-                          });
-                        }}
-                        className="mt-2"
-                        placeholder="Describe el diseño que deseas..."
-                      />
-                    </div>
-                    <div>
-                      <Label>Imágenes de inspiración (opcional)</Label>
-                      <div className="mt-2 space-y-2">
-                        <input
-                          type="file"
-                          accept="image/jpeg,image/jpg,image/png,image/webp"
-                          multiple
-                          onChange={async (e) => {
-                            const files = Array.from(e.target.files || []);
-                            if (files.length === 0) return;
+                          },
+                        });
+                      }}
+                      className="mt-2"
+                      placeholder="Describe el diseño que deseas..."
+                    />
+                  </div>
+                  <div>
+                    <Label>Imágenes de inspiración (opcional)</Label>
+                    <div className="mt-2 space-y-2">
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/jpg,image/png,image/webp"
+                        multiple
+                        onChange={async (e) => {
+                          const files = Array.from(e.target.files || []);
+                          if (files.length === 0) return;
+                          
+                          const currentImages = bookingState.customizations[service.id]?.images || [];
+                          if (currentImages.length + files.length > 3) {
+                            toast({
+                              title: 'Límite excedido',
+                              description: 'Puedes subir máximo 3 imágenes',
+                              variant: 'destructive',
+                            });
+                            return;
+                          }
+
+                          try {
+                            const uploadedUrls: string[] = [];
                             
-                            const currentImages = bookingState.customizations[service.id]?.images || [];
-                            if (currentImages.length + files.length > 3) {
-                              toast({
-                                title: 'Límite excedido',
-                                description: 'Puedes subir máximo 3 imágenes',
-                                variant: 'destructive',
-                              });
-                              return;
-                            }
-
-                            try {
-                              const uploadedUrls: string[] = [];
+                            for (const file of files) {
+                              if (file.size > 5 * 1024 * 1024) {
+                                toast({
+                                  title: 'Archivo muy grande',
+                                  description: 'Las imágenes deben ser menores a 5MB',
+                                  variant: 'destructive',
+                                });
+                                continue;
+                              }
                               
-                              for (const file of files) {
-                                if (file.size > 5 * 1024 * 1024) {
-                                  toast({
-                                    title: 'Archivo muy grande',
-                                    description: 'Las imágenes deben ser menores a 5MB',
-                                    variant: 'destructive',
-                                  });
-                                  continue;
-                                }
-                                
-                                const fileExt = file.name.split('.').pop();
-                                const fileName = `${Math.random()}.${fileExt}`;
-                                const filePath = `${fileName}`;
+                              const fileExt = file.name.split('.').pop();
+                              const fileName = `${Math.random()}.${fileExt}`;
+                              const filePath = `${fileName}`;
 
-                                const { error: uploadError } = await supabase.storage
-                                  .from('design-inspirations')
-                                  .upload(filePath, file);
+                              const { error: uploadError } = await supabase.storage
+                                .from('design-inspirations')
+                                .upload(filePath, file);
 
-                                if (uploadError) {
-                                  console.error('Upload error:', uploadError);
-                                  toast({
-                                    title: 'Error al subir',
-                                    description: 'No se pudo subir la imagen',
-                                    variant: 'destructive',
-                                  });
-                                  continue;
-                                }
-
-                                const { data: { publicUrl } } = supabase.storage
-                                  .from('design-inspirations')
-                                  .getPublicUrl(filePath);
-
-                                uploadedUrls.push(publicUrl);
+                              if (uploadError) {
+                                console.error('Upload error:', uploadError);
+                                toast({
+                                  title: 'Error al subir',
+                                  description: 'No se pudo subir la imagen',
+                                  variant: 'destructive',
+                                });
+                                continue;
                               }
 
-                              setBookingState({
-                                ...bookingState,
-                                customizations: {
-                                  ...bookingState.customizations,
-                                  [service.id]: {
-                                    ...bookingState.customizations[service.id],
-                                    images: [...currentImages, ...uploadedUrls],
-                                  },
-                                },
-                              });
+                              const { data: { publicUrl } } = supabase.storage
+                                .from('design-inspirations')
+                                .getPublicUrl(filePath);
 
-                              toast({
-                                title: 'Imágenes subidas',
-                                description: `${uploadedUrls.length} imagen(es) subida(s) exitosamente`,
-                              });
-                            } catch (error) {
-                              console.error('Error:', error);
-                              toast({
-                                title: 'Error',
-                                description: 'Ocurrió un error al subir las imágenes',
-                                variant: 'destructive',
-                              });
+                              uploadedUrls.push(publicUrl);
                             }
-                          }}
-                          className="block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90 cursor-pointer"
-                        />
-                        <p className="text-xs text-muted-foreground">
-                          Sube hasta 3 imágenes (máx. 5MB c/u) del diseño que deseas
-                        </p>
-                        {bookingState.customizations[service.id]?.images && bookingState.customizations[service.id].images.length > 0 && (
-                          <div className="grid grid-cols-3 gap-2 mt-4">
-                            {bookingState.customizations[service.id].images.map((url: string, idx: number) => (
-                              <div key={idx} className="relative aspect-square rounded-lg overflow-hidden border">
-                                <img src={url} alt={`Inspiración ${idx + 1}`} className="w-full h-full object-cover" />
-                                <button
-                                  onClick={() => {
-                                    const currentImages = bookingState.customizations[service.id]?.images || [];
-                                    setBookingState({
-                                      ...bookingState,
-                                      customizations: {
-                                        ...bookingState.customizations,
-                                        [service.id]: {
-                                          ...bookingState.customizations[service.id],
-                                          images: currentImages.filter((_: string, i: number) => i !== idx),
-                                        },
+
+                            setBookingState({
+                              ...bookingState,
+                              customizations: {
+                                ...bookingState.customizations,
+                                [service.id]: {
+                                  ...bookingState.customizations[service.id],
+                                  images: [...currentImages, ...uploadedUrls],
+                                },
+                              },
+                            });
+
+                            toast({
+                              title: 'Imágenes subidas',
+                              description: `${uploadedUrls.length} imagen(es) subida(s) exitosamente`,
+                            });
+                          } catch (error) {
+                            console.error('Error:', error);
+                            toast({
+                              title: 'Error',
+                              description: 'Ocurrió un error al subir las imágenes',
+                              variant: 'destructive',
+                            });
+                          }
+                        }}
+                        className="block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90 cursor-pointer"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Sube hasta 3 imágenes (máx. 5MB c/u) del diseño que deseas
+                      </p>
+                      {bookingState.customizations[service.id]?.images && bookingState.customizations[service.id].images.length > 0 && (
+                        <div className="grid grid-cols-3 gap-2 mt-4">
+                          {bookingState.customizations[service.id].images.map((url: string, idx: number) => (
+                            <div key={idx} className="relative aspect-square rounded-lg overflow-hidden border">
+                              <img src={url} alt={`Inspiración ${idx + 1}`} className="w-full h-full object-cover" />
+                              <Button
+                                variant="destructive"
+                                size="icon"
+                                className="absolute top-1 right-1 h-6 w-6"
+                                onClick={() => {
+                                  const newImages = bookingState.customizations[service.id].images.filter((_: string, i: number) => i !== idx);
+                                  setBookingState({
+                                    ...bookingState,
+                                    customizations: {
+                                      ...bookingState.customizations,
+                                      [service.id]: {
+                                        ...bookingState.customizations[service.id],
+                                        images: newImages,
                                       },
-                                    });
-                                  }}
-                                  className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-destructive/90"
-                                >
-                                  ×
-                                </button>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
+                                    },
+                                  });
+                                }}
+                              >
+                                ×
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
-                )}
+                </div>
               </div>
             ))}
             <Button onClick={handleNext} className="w-full gradient-primary text-white">
