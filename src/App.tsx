@@ -14,6 +14,7 @@ import Contact from "./pages/Contact";
 import About from "./pages/About";
 import Diplomas from "./pages/Diplomas";
 import ImageEditor from "./pages/ImageEditor";
+import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,6 +26,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
+          <Route path="/auth" element={<Auth />} />
           <Route element={<Layout />}>
             <Route path="/" element={<Index />} />
             <Route path="/servicios" element={<Services />} />

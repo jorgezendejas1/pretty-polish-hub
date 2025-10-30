@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
 import { Menu, X, Calendar, Instagram, Facebook, Phone } from 'lucide-react';
 import { SALON_INFO } from '@/lib/constants';
+import { AuthButton } from '@/components/AuthButton';
 
 export const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -95,6 +96,7 @@ export const Header = () => {
               >
                 <Phone className="h-5 w-5" />
               </a>
+              <AuthButton />
               <Button onClick={handleBooking} className="gradient-primary text-white">
                 <Calendar className="mr-2 h-4 w-4" />
                 Reservar Ahora
@@ -160,6 +162,9 @@ export const Header = () => {
               </nav>
 
               <div className="mt-8 space-y-4">
+                <div className="flex justify-center mb-4">
+                  <AuthButton />
+                </div>
                 <Button
                   onClick={handleBooking}
                   className="w-full gradient-primary text-white"

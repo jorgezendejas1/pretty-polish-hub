@@ -64,12 +64,18 @@ export const BookingFlow = ({ initialServices, onBack }: BookingFlowProps) => {
     return sum + service.price;
   }, 0);
 
-  const generateAvailableTimes = () => {
+  const generateAvailableTimes = async () => {
+    if (!bookingState.selectedDate || !bookingState.selectedProfessional) {
+      setAvailableTimes([]);
+      return;
+    }
+
     const times: string[] = [];
     const start = 10; // 10 AM
     const end = 20; // 8 PM
     const interval = 30; // 30 minutos
 
+    // Generar todos los horarios posibles
     for (let hour = start; hour < end; hour++) {
       for (let minute = 0; minute < 60; minute += interval) {
         const timeSlotEnd = hour * 60 + minute + totalDuration;
@@ -81,13 +87,57 @@ export const BookingFlow = ({ initialServices, onBack }: BookingFlowProps) => {
         }
       }
     }
-    setAvailableTimes(times);
+
+    // Consultar reservas existentes para esa fecha y profesional
+    try {
+      const formattedDate = format(bookingState.selectedDate, 'yyyy-MM-dd');
+      const { data: existingBookings, error } = await supabase
+        .from('bookings')
+        .select('booking_time, total_duration')
+        .eq('booking_date', formattedDate)
+        .eq('professional_id', bookingState.selectedProfessional.id)
+        .neq('status', 'cancelled');
+
+      if (error) {
+        console.error('Error al consultar disponibilidad:', error);
+        setAvailableTimes(times);
+        return;
+      }
+
+      // Filtrar horarios ocupados
+      const availableFiltered = times.filter((time) => {
+        const [hours, minutes] = time.split(':').map(Number);
+        const slotStartMinutes = hours * 60 + minutes;
+        const slotEndMinutes = slotStartMinutes + totalDuration;
+
+        // Verificar si este horario se solapa con alguna reserva existente
+        const hasConflict = existingBookings?.some((booking) => {
+          const [bookingHours, bookingMinutes] = booking.booking_time.split(':').map(Number);
+          const bookingStartMinutes = bookingHours * 60 + bookingMinutes;
+          const bookingEndMinutes = bookingStartMinutes + booking.total_duration;
+
+          // Hay conflicto si los horarios se solapan
+          return (
+            (slotStartMinutes >= bookingStartMinutes && slotStartMinutes < bookingEndMinutes) ||
+            (slotEndMinutes > bookingStartMinutes && slotEndMinutes <= bookingEndMinutes) ||
+            (slotStartMinutes <= bookingStartMinutes && slotEndMinutes >= bookingEndMinutes)
+          );
+        });
+
+        return !hasConflict;
+      });
+
+      setAvailableTimes(availableFiltered);
+    } catch (error) {
+      console.error('Error al verificar disponibilidad:', error);
+      setAvailableTimes(times);
+    }
   };
 
-  const handleDateSelect = (date: Date | undefined) => {
+  const handleDateSelect = async (date: Date | undefined) => {
     if (date) {
       setBookingState({ ...bookingState, selectedDate: date, selectedTime: null });
-      generateAvailableTimes();
+      await generateAvailableTimes();
     }
   };
 
