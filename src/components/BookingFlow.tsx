@@ -48,6 +48,13 @@ export const BookingFlow = ({ initialServices, onBack }: BookingFlowProps) => {
     localStorage.setItem('bookingState', JSON.stringify(bookingState));
   }, [bookingState]);
 
+  // Regenerar horarios disponibles cuando cambie el profesional o la fecha
+  useEffect(() => {
+    if (bookingState.selectedDate && bookingState.selectedProfessional) {
+      generateAvailableTimes();
+    }
+  }, [bookingState.selectedProfessional, bookingState.selectedDate]);
+
   const totalDuration = bookingState.selectedServices.reduce((sum, service) => {
     const customization = bookingState.customizations[service.id];
     if (service.isCustomizable && customization?.quantity) {
@@ -562,7 +569,7 @@ END:VCALENDAR`;
                       : 'hover:shadow-md'
                   }`}
                   onClick={() =>
-                    setBookingState({ ...bookingState, selectedProfessional: member })
+                    setBookingState({ ...bookingState, selectedProfessional: member, selectedTime: null })
                   }
                 >
                   <CardContent className="flex items-center gap-4 p-4">

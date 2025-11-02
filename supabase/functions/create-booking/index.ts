@@ -147,6 +147,58 @@ serve(async (req) => {
       inspiration_images: bookingData.inspiration_images || []
     };
     
+    // Check for scheduling conflicts with the same professional
+    const { data: existingBookings, error: checkError } = await supabase
+      .from('bookings')
+      .select('booking_time, total_duration')
+      .eq('booking_date', sanitizedData.booking_date)
+      .eq('professional_id', sanitizedData.professional_id)
+      .neq('status', 'cancelled');
+    
+    if (checkError) {
+      console.error('Error checking availability:', checkError);
+      return new Response(
+        JSON.stringify({ error: 'Failed to check availability' }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
+    }
+    
+    // Check for time conflicts
+    if (existingBookings && existingBookings.length > 0) {
+      const [requestedHours, requestedMinutes] = sanitizedData.booking_time.split(':').map(Number);
+      const requestedStartMinutes = requestedHours * 60 + requestedMinutes;
+      const requestedEndMinutes = requestedStartMinutes + sanitizedData.total_duration;
+      
+      const hasConflict = existingBookings.some((booking) => {
+        const [bookingHours, bookingMinutes] = booking.booking_time.split(':').map(Number);
+        const bookingStartMinutes = bookingHours * 60 + bookingMinutes;
+        const bookingEndMinutes = bookingStartMinutes + booking.total_duration;
+        
+        // Check if time slots overlap
+        return (
+          (requestedStartMinutes >= bookingStartMinutes && requestedStartMinutes < bookingEndMinutes) ||
+          (requestedEndMinutes > bookingStartMinutes && requestedEndMinutes <= bookingEndMinutes) ||
+          (requestedStartMinutes <= bookingStartMinutes && requestedEndMinutes >= bookingEndMinutes)
+        );
+      });
+      
+      if (hasConflict) {
+        return new Response(
+          JSON.stringify({ 
+            error: 'Este horario ya no está disponible con esta profesional. Por favor selecciona otro horario.',
+            code: 'BOOKING_CONFLICT'
+          }),
+          {
+            status: 409,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          }
+        );
+      }
+    }
+    
     // Insert booking with service role (bypasses RLS)
     const { data, error } = await supabase
       .from('bookings')

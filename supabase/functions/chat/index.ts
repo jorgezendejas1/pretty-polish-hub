@@ -94,6 +94,53 @@ const handleToolCall = async (toolName: string, args: any, supabase: any) => {
       }
     }
     
+    // Check existing bookings to filter occupied times
+    try {
+      const supabaseAdmin = createClient(
+        Deno.env.get('SUPABASE_URL')!,
+        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+      );
+      
+      const { data: existingBookings, error } = await supabaseAdmin
+        .from('bookings')
+        .select('booking_time, total_duration')
+        .eq('booking_date', date)
+        .eq('professional_id', professional_id)
+        .neq('status', 'cancelled');
+      
+      if (!error && existingBookings && existingBookings.length > 0) {
+        // Filter out occupied time slots
+        const availableFiltered = times.filter((time) => {
+          const [hours, minutes] = time.split(':').map(Number);
+          const slotStartMinutes = hours * 60 + minutes;
+          const slotEndMinutes = slotStartMinutes + duration;
+          
+          const hasConflict = existingBookings.some((booking) => {
+            const [bookingHours, bookingMinutes] = booking.booking_time.split(':').map(Number);
+            const bookingStartMinutes = bookingHours * 60 + bookingMinutes;
+            const bookingEndMinutes = bookingStartMinutes + booking.total_duration;
+            
+            return (
+              (slotStartMinutes >= bookingStartMinutes && slotStartMinutes < bookingEndMinutes) ||
+              (slotEndMinutes > bookingStartMinutes && slotEndMinutes <= bookingEndMinutes) ||
+              (slotStartMinutes <= bookingStartMinutes && slotEndMinutes >= bookingEndMinutes)
+            );
+          });
+          
+          return !hasConflict;
+        });
+        
+        return JSON.stringify({ 
+          available: true, 
+          availableTimes: availableFiltered,
+          professional: professional.name 
+        });
+      }
+    } catch (error) {
+      console.error('Error checking existing bookings:', error);
+      // Continue with all times if error
+    }
+    
     return JSON.stringify({ 
       available: true, 
       availableTimes: times,
@@ -121,6 +168,45 @@ const handleToolCall = async (toolName: string, args: any, supabase: any) => {
         Deno.env.get('SUPABASE_URL')!,
         Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
       );
+      
+      // Check for scheduling conflicts first
+      const { data: existingBookings, error: checkError } = await supabaseAdmin
+        .from('bookings')
+        .select('booking_time, total_duration')
+        .eq('booking_date', booking_date)
+        .eq('professional_id', professional_id)
+        .neq('status', 'cancelled');
+      
+      if (checkError) {
+        console.error('Error checking availability:', checkError);
+        return JSON.stringify({ success: false, error: 'Error al verificar disponibilidad' });
+      }
+      
+      // Check for time conflicts
+      if (existingBookings && existingBookings.length > 0) {
+        const [requestedHours, requestedMinutes] = booking_time.split(':').map(Number);
+        const requestedStartMinutes = requestedHours * 60 + requestedMinutes;
+        const requestedEndMinutes = requestedStartMinutes + totalDuration;
+        
+        const hasConflict = existingBookings.some((booking) => {
+          const [bookingHours, bookingMinutes] = booking.booking_time.split(':').map(Number);
+          const bookingStartMinutes = bookingHours * 60 + bookingMinutes;
+          const bookingEndMinutes = bookingStartMinutes + booking.total_duration;
+          
+          return (
+            (requestedStartMinutes >= bookingStartMinutes && requestedStartMinutes < bookingEndMinutes) ||
+            (requestedEndMinutes > bookingStartMinutes && requestedEndMinutes <= bookingEndMinutes) ||
+            (requestedStartMinutes <= bookingStartMinutes && requestedEndMinutes >= bookingEndMinutes)
+          );
+        });
+        
+        if (hasConflict) {
+          return JSON.stringify({ 
+            success: false, 
+            error: 'Lo siento, ese horario ya no está disponible con esta profesional. Por favor elige otro horario.' 
+          });
+        }
+      }
       
       const { data, error } = await supabaseAdmin
         .from('bookings')
