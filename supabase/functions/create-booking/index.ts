@@ -208,8 +208,21 @@ serve(async (req) => {
     
     if (error) {
       console.error('Database error:', error);
+      
+      // Provide user-friendly error messages
+      let errorMessage = 'No pudimos procesar tu reserva. Por favor intenta de nuevo.';
+      if (error.message.includes('duplicate')) {
+        errorMessage = 'Ya existe una reserva con estos datos.';
+      } else if (error.message.includes('foreign key')) {
+        errorMessage = 'Datos de la reserva inválidos. Por favor verifica la información.';
+      }
+      
       return new Response(
-        JSON.stringify({ error: 'Failed to create booking' }),
+        JSON.stringify({ 
+          success: false,
+          error: errorMessage,
+          code: 'DATABASE_ERROR'
+        }),
         {
           status: 500,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },

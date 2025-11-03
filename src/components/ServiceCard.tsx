@@ -19,7 +19,7 @@ export const ServiceCard = ({ service, onBook, isSelected, onToggleSelect }: Ser
 
   return (
     <Card
-      className={`overflow-hidden transition-smooth hover:shadow-elegant cursor-pointer ${
+      className={`overflow-hidden transition-smooth hover:shadow-elegant cursor-pointer animate-fade-in ${
         isSelected ? 'ring-2 ring-primary shadow-elegant' : ''
       }`}
       onClick={handleClick}
@@ -59,15 +59,31 @@ export const ServiceCard = ({ service, onBook, isSelected, onToggleSelect }: Ser
         </div>
       </CardContent>
       <CardFooter>
-        <Button
-          onClick={(e) => {
-            e.stopPropagation();
-            onBook(service.id);
-          }}
-          className="w-full gradient-primary text-white"
-        >
-          Reservar ahora
-        </Button>
+        {onToggleSelect ? (
+          <Button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleClick();
+            }}
+            className={`w-full transition-all duration-300 ${
+              isSelected 
+                ? 'bg-muted text-foreground hover:bg-muted/80' 
+                : 'gradient-primary text-white'
+            }`}
+          >
+            {isSelected ? 'Quitar selección' : 'Seleccionar'}
+          </Button>
+        ) : (
+          <Button
+            onClick={(e) => {
+              e.stopPropagation();
+              onBook(service.id);
+            }}
+            className="w-full gradient-primary text-white"
+          >
+            Reservar ahora
+          </Button>
+        )}
       </CardFooter>
     </Card>
   );

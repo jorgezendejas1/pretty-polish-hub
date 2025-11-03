@@ -54,6 +54,7 @@ export const BookingFlow = ({ initialServices, onBack }: BookingFlowProps) => {
       if (session?.user) {
         const email = session.user.email || '';
         const fullName = session.user.user_metadata?.full_name || '';
+        const phone = session.user.user_metadata?.phone || '';
         
         setBookingState(prev => ({
           ...prev,
@@ -61,6 +62,7 @@ export const BookingFlow = ({ initialServices, onBack }: BookingFlowProps) => {
             ...prev.clientData,
             email: email || prev.clientData.email,
             name: fullName || prev.clientData.name,
+            phone: phone || prev.clientData.phone,
           }
         }));
       }
@@ -719,8 +721,44 @@ END:VCALENDAR`;
                   })
                 }
                 className="mt-2"
+                placeholder="+52 998 123 4567"
               />
             </div>
+            
+            <div className="space-y-3 pt-4 border-t">
+              <Label className="text-base font-semibold">Recordatorios de Cita</Label>
+              <div className="space-y-2">
+                <label className="flex items-center space-x-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={bookingState.clientData.emailReminder !== false}
+                    onChange={(e) =>
+                      setBookingState({
+                        ...bookingState,
+                        clientData: { ...bookingState.clientData, emailReminder: e.target.checked },
+                      })
+                    }
+                    className="w-4 h-4 text-primary rounded focus:ring-primary"
+                  />
+                  <span className="text-sm">Enviarme un recordatorio por correo 24h antes</span>
+                </label>
+                <label className="flex items-center space-x-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={bookingState.clientData.smsReminder === true}
+                    onChange={(e) =>
+                      setBookingState({
+                        ...bookingState,
+                        clientData: { ...bookingState.clientData, smsReminder: e.target.checked },
+                      })
+                    }
+                    className="w-4 h-4 text-primary rounded focus:ring-primary"
+                  />
+                  <span className="text-sm">Enviarme un recordatorio por SMS 24h antes</span>
+                </label>
+              </div>
+            </div>
+            
             <Button onClick={handleNext} className="w-full gradient-primary text-white">
               Continuar
             </Button>

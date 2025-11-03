@@ -15,6 +15,7 @@ export default function Auth() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
+  const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
   
   // Get the return path from state, default to home
@@ -62,6 +63,7 @@ export default function Auth() {
             emailRedirectTo: `${window.location.origin}/`,
             data: {
               full_name: fullName,
+              phone: phone,
             },
           },
         });
@@ -156,16 +158,29 @@ export default function Auth() {
 
           <form onSubmit={handleEmailAuth} className="space-y-4">
             {!isLogin && (
-              <div className="space-y-2">
-                <Label htmlFor="fullName">Nombre Completo</Label>
-                <Input
-                  id="fullName"
-                  placeholder="Tu nombre"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  required={!isLogin}
-                />
-              </div>
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="fullName">Nombre Completo</Label>
+                  <Input
+                    id="fullName"
+                    placeholder="Tu nombre"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    required={!isLogin}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Teléfono</Label>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    placeholder="+52 998 123 4567"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    required={!isLogin}
+                  />
+                </div>
+              </>
             )}
 
             <div className="space-y-2">

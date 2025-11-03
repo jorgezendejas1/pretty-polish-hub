@@ -60,6 +60,8 @@ export interface BookingState {
     name: string;
     email: string;
     phone: string;
+    emailReminder?: boolean;
+    smsReminder?: boolean;
   };
   currentStep: number;
 }
