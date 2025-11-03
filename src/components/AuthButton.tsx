@@ -62,7 +62,7 @@ export const AuthButton = () => {
   if (!user) {
     return (
       <Button
-        onClick={() => navigate('/auth')}
+        onClick={() => navigate('/auth', { state: { from: window.location.pathname } })}
         variant="outline"
         className="gap-2"
       >

@@ -48,6 +48,25 @@ export const BookingFlow = ({ initialServices, onBack }: BookingFlowProps) => {
     localStorage.setItem('bookingState', JSON.stringify(bookingState));
   }, [bookingState]);
 
+  // Auto-fill user data if authenticated
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        const email = session.user.email || '';
+        const fullName = session.user.user_metadata?.full_name || '';
+        
+        setBookingState(prev => ({
+          ...prev,
+          clientData: {
+            ...prev.clientData,
+            email: email || prev.clientData.email,
+            name: fullName || prev.clientData.name,
+          }
+        }));
+      }
+    });
+  }, []);
+
   // Regenerar horarios disponibles cuando cambie el profesional o la fecha
   useEffect(() => {
     if (bookingState.selectedDate && bookingState.selectedProfessional) {

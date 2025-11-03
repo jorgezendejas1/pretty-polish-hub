@@ -45,6 +45,7 @@ const handler = async (req: Request): Promise<Response> => {
     const emailResponse = await resend.emails.send({
       from: "Pitaya Nails <onboarding@resend.dev>",
       to: [email],
+      cc: ["liliana.ventas.retail@gmail.com", "pitayanailscancun@gmail.com"],
       subject: "✨ Confirmación de tu Cita en Pitaya Nails",
       html: `
         <!DOCTYPE html>
