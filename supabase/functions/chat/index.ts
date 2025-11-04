@@ -232,11 +232,31 @@ const handleToolCall = async (toolName: string, args: any, supabase: any) => {
         return JSON.stringify({ success: false, error: 'Error al crear la reserva' });
       }
       
+      // Enviar correo de confirmación
+      try {
+        await supabaseAdmin.functions.invoke('send-booking-confirmation', {
+          body: {
+            booking_id: data.id,
+            client_email: data.client_email,
+            client_name: data.client_name,
+            booking_date: data.booking_date,
+            booking_time: data.booking_time,
+            service_names: data.service_names,
+            professional_name: data.professional_name,
+            total_price: data.total_price,
+            total_duration: data.total_duration,
+          }
+        });
+      } catch (emailError) {
+        console.error('Error sending confirmation email:', emailError);
+        // No fallar la reserva si el correo falla
+      }
+      
       return JSON.stringify({ 
         success: true, 
         booking_id: data.id,
         booking_token: data.booking_token,
-        message: `¡Reserva confirmada! Tu cita es el ${booking_date} a las ${booking_time} con ${professional?.name}. Total: $${totalPrice} MXN. Guarda este código para consultar tu reserva: ${data.booking_token.substring(0, 8)}` 
+        message: `¡Reserva confirmada! Tu cita es el ${booking_date} a las ${booking_time} con ${professional?.name}. Total: $${totalPrice} MXN (${totalDuration} minutos). Te hemos enviado un correo de confirmación. Guarda este código para consultar tu reserva: ${data.booking_token.substring(0, 8)}` 
       });
     } catch (error) {
       console.error('Booking creation exception:', error);

@@ -16,6 +16,7 @@ import Diplomas from "./pages/Diplomas";
 import ImageEditor from "./pages/ImageEditor";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import Dashboard from "./pages/Dashboard";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,7 @@ const App = () => (
             <Route path="/certificaciones" element={<Diplomas />} />
             <Route path="/editor" element={<ImageEditor />} />
             <Route path="/contacto" element={<Contact />} />
+            <Route path="/dashboard" element={<Dashboard />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

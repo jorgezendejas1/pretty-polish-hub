@@ -69,12 +69,12 @@ export const BookingFlow = ({ initialServices, onBack }: BookingFlowProps) => {
     });
   }, []);
 
-  // Regenerar horarios disponibles cuando cambie el profesional o la fecha
+  // Regenerar horarios disponibles cuando cambie el profesional, la fecha o los servicios
   useEffect(() => {
     if (bookingState.selectedDate && bookingState.selectedProfessional) {
       generateAvailableTimes();
     }
-  }, [bookingState.selectedProfessional, bookingState.selectedDate]);
+  }, [bookingState.selectedProfessional, bookingState.selectedDate, bookingState.selectedServices, bookingState.customizations]);
 
   const totalDuration = bookingState.selectedServices.reduce((sum, service) => {
     const customization = bookingState.customizations[service.id];

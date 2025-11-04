@@ -21,6 +21,7 @@ export const Chatbot = () => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -129,6 +130,8 @@ export const Chatbot = () => {
       setMessages(newMessages);
     } finally {
       setIsLoading(false);
+      // Devolver foco al input después de enviar
+      setTimeout(() => inputRef.current?.focus(), 100);
     }
   };
 
@@ -189,6 +192,7 @@ export const Chatbot = () => {
           <div className="p-4 border-t">
             <div className="flex gap-2">
               <Input
+                ref={inputRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleSend()}
