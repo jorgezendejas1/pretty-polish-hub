@@ -109,133 +109,136 @@ const ImageEditor = () => {
   };
 
   return (
-    <div className="min-h-screen pt-24 pb-12">
+    <div className="min-h-screen pt-24 pb-12 bg-gradient-to-b from-background to-secondary/20">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-6xl font-display font-bold mb-4">
-            Editor de Imágenes con IA
+          <h1 className="text-4xl md:text-6xl font-display font-bold mb-4 bg-gradient-to-r from-primary to-primary-glow bg-clip-text text-transparent">
+            Editor Mágico con IA
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Sube una foto de tus uñas y describe cómo quieres editarla. Nuestra IA hará la magia.
+            ¿Tienes una idea para tus uñas? Sube tu foto de tus manos y dile a nuestra IA qué diseño quieres ver. ¡Pura inspiración!
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
-          {/* Controles */}
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Sube tu imagen</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div
-                  onDrop={handleDrop}
-                  onDragOver={(e) => e.preventDefault()}
-                  className="border-2 border-dashed border-border rounded-lg p-8 text-center cursor-pointer hover:border-primary transition-colors"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground mb-2">
-                    Arrastra una imagen aquí o haz clic para seleccionar
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Formatos: JPG, PNG, WEBP
-                  </p>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileSelect}
-                    className="hidden"
-                  />
-                </div>
-
-                {originalImage && (
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="prompt">¿Qué quieres hacer?</Label>
-                      <Input
-                        id="prompt"
-                        value={prompt}
-                        onChange={(e) => setPrompt(e.target.value)}
-                        placeholder="Ej: Cambia el color del esmalte a rosa, añade brillo, etc."
-                        className="mt-2"
+        <div className="max-w-7xl mx-auto">
+          <div className="grid lg:grid-cols-[400px_1fr] gap-6">
+            {/* Controles - Panel izquierdo */}
+            <div className="space-y-6">
+              <Card className="shadow-elegant">
+                <CardHeader>
+                  <CardTitle className="font-display text-xl">Controles</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Subir imagen */}
+                  <div className="space-y-3">
+                    <Label className="text-base font-semibold">1. Sube tu imagen</Label>
+                    <div
+                      onDrop={handleDrop}
+                      onDragOver={(e) => e.preventDefault()}
+                      className="border-2 border-dashed border-border rounded-lg p-6 text-center cursor-pointer hover:border-primary transition-smooth hover:bg-secondary/50"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <Upload className="h-10 w-10 mx-auto mb-3 text-primary" />
+                      <p className="text-sm font-medium mb-1">
+                        Arrastra y suelta o haz clic para subir
+                      </p>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileSelect}
+                        className="hidden"
                       />
                     </div>
-
-                    <Button
-                      onClick={handleApplyMagic}
-                      disabled={isLoading || !prompt.trim()}
-                      className="w-full gradient-primary text-white"
-                    >
-                      {isLoading ? (
-                        <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                          Aplicando magia...
-                        </>
-                      ) : (
-                        <>
-                          <Wand2 className="h-4 w-4 mr-2" />
-                          Aplicar Magia
-                        </>
-                      )}
-                    </Button>
                   </div>
-                )}
-              </CardContent>
-            </Card>
 
-            {editedImage && (
-              <Card>
-                <CardContent className="pt-6">
-                  <Button onClick={handleDownload} className="w-full" variant="outline">
-                    <Download className="h-4 w-4 mr-2" />
-                    Descargar Imagen
+                  {/* Describe la magia */}
+                  <div className="space-y-3">
+                    <Label className="text-base font-semibold">2. Describe la magia</Label>
+                    <textarea
+                      value={prompt}
+                      onChange={(e) => setPrompt(e.target.value)}
+                      placeholder='Ej: "píntala de rojo cereza con un diseño de flores blancas"'
+                      className="w-full min-h-[120px] p-3 rounded-lg border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 transition-smooth resize-none"
+                      disabled={!originalImage}
+                    />
+                  </div>
+
+                  {/* Botón Aplicar Magia */}
+                  <Button
+                    onClick={handleApplyMagic}
+                    disabled={isLoading || !prompt.trim() || !originalImage}
+                    className="w-full h-12 gradient-primary text-white font-semibold text-base shadow-glow hover:shadow-elegant transition-smooth"
+                  >
+                    {isLoading ? (
+                      <>
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2" />
+                        Aplicando magia...
+                      </>
+                    ) : (
+                      <>
+                        <Wand2 className="h-5 w-5 mr-2" />
+                        Aplicar Magia
+                      </>
+                    )}
                   </Button>
+
+                  {editedImage && (
+                    <Button 
+                      onClick={handleDownload} 
+                      className="w-full" 
+                      variant="outline"
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Descargar Imagen
+                    </Button>
+                  )}
                 </CardContent>
               </Card>
-            )}
-          </div>
+            </div>
 
-          {/* Vista previa */}
-          <div className="space-y-6">
-            {originalImage && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Imagen Original</CardTitle>
+            {/* Vista previa - Panel derecho */}
+            <div className="grid md:grid-cols-2 gap-6">
+              {/* Original */}
+              <Card className="shadow-soft">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-center font-display">Original</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <img
-                    src={originalImage}
-                    alt="Original"
-                    className="w-full rounded-lg"
-                  />
+                  <div className="aspect-[3/4] bg-secondary/30 rounded-lg flex items-center justify-center overflow-hidden">
+                    {originalImage ? (
+                      <img
+                        src={originalImage}
+                        alt="Original"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <p className="text-muted-foreground text-sm">Sube una imagen</p>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
-            )}
 
-            {editedImage && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Imagen Editada</CardTitle>
+              {/* Editada */}
+              <Card className="shadow-soft">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-center font-display">Editada</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <img
-                    src={editedImage}
-                    alt="Editada"
-                    className="w-full rounded-lg"
-                  />
+                  <div className="aspect-[3/4] bg-secondary/30 rounded-lg flex items-center justify-center overflow-hidden">
+                    {editedImage ? (
+                      <img
+                        src={editedImage}
+                        alt="Editada"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <p className="text-muted-foreground text-sm">La magia aparecerá aquí</p>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
-            )}
-
-            {!originalImage && !editedImage && (
-              <Card className="border-dashed">
-                <CardContent className="pt-6 text-center text-muted-foreground">
-                  <p>Las imágenes aparecerán aquí</p>
-                </CardContent>
-              </Card>
-            )}
+            </div>
           </div>
         </div>
       </div>
