@@ -24,7 +24,7 @@ export const ServiceCard = ({ service, onBook, isSelected, onToggleSelect }: Ser
       }`}
       onClick={handleClick}
     >
-      <div className="relative h-48 overflow-hidden">
+      <div className="relative h-32 sm:h-40 md:h-48 overflow-hidden">
         <img
           src={service.imageUrl}
           alt={service.name}
@@ -42,30 +42,30 @@ export const ServiceCard = ({ service, onBook, isSelected, onToggleSelect }: Ser
           </div>
         )}
       </div>
-      <CardHeader>
-        <CardTitle className="text-xl">{service.name}</CardTitle>
-        <CardDescription>{service.description}</CardDescription>
+      <CardHeader className="p-3 sm:p-4 md:p-6">
+        <CardTitle className="text-base sm:text-lg md:text-xl">{service.name}</CardTitle>
+        <CardDescription className="text-xs sm:text-sm">{service.description}</CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="flex items-center justify-between text-sm text-muted-foreground">
+      <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
+        <div className="flex items-center justify-between text-xs sm:text-sm text-muted-foreground">
           <div className="flex items-center space-x-1">
-            <Clock className="h-4 w-4" />
+            <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
             <span>{service.duration} min</span>
           </div>
           <div className="flex items-center space-x-1 text-primary font-semibold">
-            <DollarSign className="h-4 w-4" />
+            <DollarSign className="h-3 w-3 sm:h-4 sm:w-4" />
             <span>${service.price}</span>
           </div>
         </div>
       </CardContent>
-      <CardFooter>
+      <CardFooter className="p-3 sm:p-4 md:p-6 pt-0">
         {onToggleSelect ? (
           <Button
             onClick={(e) => {
               e.stopPropagation();
               handleClick();
             }}
-            className={`w-full transition-all duration-300 ${
+            className={`w-full transition-all duration-300 text-xs sm:text-sm ${
               isSelected 
                 ? 'bg-muted text-foreground hover:bg-muted/80' 
                 : 'gradient-primary text-white'
@@ -79,7 +79,7 @@ export const ServiceCard = ({ service, onBook, isSelected, onToggleSelect }: Ser
               e.stopPropagation();
               onBook(service.id);
             }}
-            className="w-full gradient-primary text-white"
+            className="w-full gradient-primary text-white text-xs sm:text-sm"
           >
             Reservar ahora
           </Button>
