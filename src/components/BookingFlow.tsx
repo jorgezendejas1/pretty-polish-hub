@@ -309,6 +309,23 @@ export const BookingFlow = ({ initialServices, onBack }: BookingFlowProps) => {
         // Don't fail the booking if email fails
       }
 
+      // Send WhatsApp notification
+      try {
+        await supabase.functions.invoke('send-whatsapp-notification', {
+          body: {
+            phone: bookingState.clientData.phone,
+            name: bookingState.clientData.name,
+            bookingDate: format(bookingState.selectedDate!, 'dd/MM/yyyy', { locale: es }),
+            bookingTime: bookingState.selectedTime,
+            services: bookingState.selectedServices.map(s => s.name),
+            professionalName: bookingState.selectedProfessional?.name || '',
+          }
+        });
+      } catch (whatsappError) {
+        console.error('Error sending WhatsApp notification:', whatsappError);
+        // Don't fail the booking if WhatsApp fails
+      }
+
       setCurrentStep(6);
       localStorage.removeItem('bookingState');
 
@@ -395,6 +412,22 @@ END:VCALENDAR`;
             <CardTitle>Personaliza tus servicios</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
+            {/* Editor Mágico Link */}
+            <div className="bg-gradient-to-r from-primary/10 to-secondary/10 border border-primary/20 rounded-lg p-4 mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-semibold text-lg mb-1">✨ ¿Necesitas inspiración?</h3>
+                  <p className="text-sm text-muted-foreground">Usa nuestro Editor Mágico para crear diseños únicos</p>
+                </div>
+                <Button
+                  variant="outline"
+                  onClick={() => window.open('/editor', '_blank')}
+                  className="ml-4"
+                >
+                  Abrir Editor
+                </Button>
+              </div>
+            </div>
             {bookingState.selectedServices.map((service) => (
               <div key={service.id} className="border-b pb-6 last:border-b-0">
                 <h3 className="font-semibold text-lg mb-2">{service.name}</h3>
