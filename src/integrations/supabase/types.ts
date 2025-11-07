@@ -151,6 +151,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_booking_availability: {
+        Args: { p_date: string; p_professional_id: string }
+        Returns: {
+          booking_time: string
+          total_duration: number
+        }[]
+      }
       check_rate_limit: {
         Args: {
           p_endpoint: string

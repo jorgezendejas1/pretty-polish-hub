@@ -120,11 +120,10 @@ export const BookingFlow = ({ initialServices, onBack }: BookingFlowProps) => {
     try {
       const formattedDate = format(bookingState.selectedDate, 'yyyy-MM-dd');
       const { data: existingBookings, error } = await supabase
-        .from('bookings')
-        .select('booking_time, total_duration')
-        .eq('booking_date', formattedDate)
-        .eq('professional_id', bookingState.selectedProfessional.id)
-        .neq('status', 'cancelled');
+        .rpc('check_booking_availability', {
+          p_date: formattedDate,
+          p_professional_id: bookingState.selectedProfessional.id
+        });
 
       if (error) {
         console.error('Error al consultar disponibilidad:', error);

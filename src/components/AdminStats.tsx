@@ -25,17 +25,35 @@ export const AdminStats = () => {
     revenueByDay: [],
   });
   const [isLoading, setIsLoading] = useState(true);
+  const [dateFilter, setDateFilter] = useState<'today' | 'week' | 'month' | 'all'>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'confirmed' | 'completed' | 'cancelled'>('all');
 
   useEffect(() => {
     loadStats();
-  }, []);
+  }, [dateFilter, statusFilter]);
 
   const loadStats = async () => {
     try {
-      const { data: bookings, error } = await supabase
-        .from('bookings')
-        .select('*')
-        .neq('status', 'cancelled');
+      let query = supabase.from('bookings').select('*');
+
+      // Apply status filter
+      if (statusFilter !== 'all') {
+        query = query.eq('status', statusFilter);
+      }
+
+      // Apply date filter
+      const today = format(new Date(), 'yyyy-MM-dd');
+      if (dateFilter === 'today') {
+        query = query.eq('booking_date', today);
+      } else if (dateFilter === 'week') {
+        const weekAgo = format(subDays(new Date(), 7), 'yyyy-MM-dd');
+        query = query.gte('booking_date', weekAgo);
+      } else if (dateFilter === 'month') {
+        const monthAgo = format(subDays(new Date(), 30), 'yyyy-MM-dd');
+        query = query.gte('booking_date', monthAgo);
+      }
+
+      const { data: bookings, error } = await query;
 
       if (error) throw error;
 
@@ -51,8 +69,8 @@ export const AdminStats = () => {
       const totalRevenue = bookings.reduce((sum, b) => sum + Number(b.total_price), 0);
 
       // Bookings today
-      const today = format(new Date(), 'yyyy-MM-dd');
-      const bookingsToday = bookings.filter(b => b.booking_date === today).length;
+      const todayDate = format(new Date(), 'yyyy-MM-dd');
+      const bookingsToday = bookings.filter(b => b.booking_date === todayDate).length;
 
       // Popular services
       const serviceCount: Record<string, number> = {};
@@ -108,6 +126,42 @@ export const AdminStats = () => {
 
   return (
     <div className="space-y-6">
+      {/* Filters */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Filtros</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-wrap gap-4">
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-medium">Periodo</label>
+            <select
+              value={dateFilter}
+              onChange={(e) => setDateFilter(e.target.value as any)}
+              className="px-3 py-2 border rounded-md bg-background"
+            >
+              <option value="all">Todos</option>
+              <option value="today">Hoy</option>
+              <option value="week">Última semana</option>
+              <option value="month">Último mes</option>
+            </select>
+          </div>
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-medium">Estado</label>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value as any)}
+              className="px-3 py-2 border rounded-md bg-background"
+            >
+              <option value="all">Todos</option>
+              <option value="pending">Pendiente</option>
+              <option value="confirmed">Confirmada</option>
+              <option value="completed">Completada</option>
+              <option value="cancelled">Cancelada</option>
+            </select>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
