@@ -290,41 +290,37 @@ export const BookingFlow = ({ initialServices, onBack }: BookingFlowProps) => {
       });
       localStorage.setItem('bookingHistory', JSON.stringify(history));
 
-      // Send confirmation email
-      try {
-        await supabase.functions.invoke('send-booking-confirmation', {
-          body: {
-            email: bookingState.clientData.email,
-            name: bookingState.clientData.name,
-            bookingDate: format(bookingState.selectedDate!, 'dd/MM/yyyy', { locale: es }),
-            bookingTime: bookingState.selectedTime,
-            services: bookingState.selectedServices.map(s => s.name),
-            professionalName: bookingState.selectedProfessional?.name || '',
-            totalPrice,
-            totalDuration,
-          }
-        });
-      } catch (emailError) {
+      // Send confirmation email (non-blocking - don't fail if this errors)
+      supabase.functions.invoke('send-booking-confirmation', {
+        body: {
+          email: bookingState.clientData.email,
+          name: bookingState.clientData.name,
+          bookingDate: format(bookingState.selectedDate!, 'dd/MM/yyyy', { locale: es }),
+          bookingTime: bookingState.selectedTime,
+          services: bookingState.selectedServices.map(s => s.name),
+          professionalName: bookingState.selectedProfessional?.name || '',
+          totalPrice,
+          totalDuration,
+        }
+      }).catch(emailError => {
         console.error('Error sending email:', emailError);
         // Don't fail the booking if email fails
-      }
+      });
 
-      // Send WhatsApp notification
-      try {
-        await supabase.functions.invoke('send-whatsapp-notification', {
-          body: {
-            phone: bookingState.clientData.phone,
-            name: bookingState.clientData.name,
-            bookingDate: format(bookingState.selectedDate!, 'dd/MM/yyyy', { locale: es }),
-            bookingTime: bookingState.selectedTime,
-            services: bookingState.selectedServices.map(s => s.name),
-            professionalName: bookingState.selectedProfessional?.name || '',
-          }
-        });
-      } catch (whatsappError) {
+      // Send WhatsApp notification (non-blocking)
+      supabase.functions.invoke('send-whatsapp-notification', {
+        body: {
+          phone: bookingState.clientData.phone,
+          name: bookingState.clientData.name,
+          bookingDate: format(bookingState.selectedDate!, 'dd/MM/yyyy', { locale: es }),
+          bookingTime: bookingState.selectedTime,
+          services: bookingState.selectedServices.map(s => s.name),
+          professionalName: bookingState.selectedProfessional?.name || '',
+        }
+      }).catch(whatsappError => {
         console.error('Error sending WhatsApp notification:', whatsappError);
         // Don't fail the booking if WhatsApp fails
-      }
+      });
 
       setCurrentStep(6);
       localStorage.removeItem('bookingState');
