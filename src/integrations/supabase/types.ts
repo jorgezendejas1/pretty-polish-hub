@@ -125,6 +125,82 @@ export type Database = {
         }
         Relationships: []
       }
+      reviews: {
+        Row: {
+          booking_id: string
+          client_email: string
+          client_name: string
+          comment: string | null
+          created_at: string
+          id: string
+          rating: number
+        }
+        Insert: {
+          booking_id: string
+          client_email: string
+          client_name: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          rating: number
+        }
+        Update: {
+          booking_id?: string
+          client_email?: string
+          client_name?: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          rating?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scheduled_reminders: {
+        Row: {
+          booking_id: string
+          created_at: string
+          id: string
+          reminder_type: string
+          scheduled_for: string
+          sent: boolean
+          sent_at: string | null
+        }
+        Insert: {
+          booking_id: string
+          created_at?: string
+          id?: string
+          reminder_type?: string
+          scheduled_for: string
+          sent?: boolean
+          sent_at?: string | null
+        }
+        Update: {
+          booking_id?: string
+          created_at?: string
+          id?: string
+          reminder_type?: string
+          scheduled_for?: string
+          sent?: boolean
+          sent_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scheduled_reminders_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string

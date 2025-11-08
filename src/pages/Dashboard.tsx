@@ -20,6 +20,9 @@ import {
 } from "@/components/ui/table";
 import { Badge } from '@/components/ui/badge';
 import { AdminStats } from '@/components/AdminStats';
+import { ReviewDialog } from '@/components/ReviewDialog';
+import { ExportReportButton } from '@/components/ExportReportButton';
+import { Star } from 'lucide-react';
 
 interface Booking {
   id: string;
@@ -45,6 +48,8 @@ export default function Dashboard() {
   const [editingBooking, setEditingBooking] = useState<Booking | null>(null);
   const [newDate, setNewDate] = useState<Date | undefined>(undefined);
   const [newTime, setNewTime] = useState('');
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -220,10 +225,13 @@ export default function Dashboard() {
               Volver al inicio
             </Button>
             {isAdmin && (
-              <Badge className="gradient-primary text-white">
-                <Shield className="h-3 w-3 mr-1" />
-                Administrador
-              </Badge>
+              <>
+                <Badge className="gradient-primary text-white">
+                  <Shield className="h-3 w-3 mr-1" />
+                  Administrador
+                </Badge>
+                <ExportReportButton />
+              </>
             )}
           </div>
         </div>
@@ -342,6 +350,20 @@ export default function Dashboard() {
                         )}
                         <TableCell>
                           <div className="flex gap-2">
+                            {booking.status === 'completed' && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setSelectedBooking(booking);
+                                  setReviewDialogOpen(true);
+                                }}
+                                className="gap-1"
+                              >
+                                <Star className="h-4 w-4" />
+                                Calificar
+                              </Button>
+                            )}
                             {booking.status !== 'cancelled' && booking.status !== 'completed' && (
                               <>
                                 <Dialog>
@@ -422,6 +444,19 @@ export default function Dashboard() {
             )}
           </CardContent>
         </Card>
+        
+        {selectedBooking && (
+          <ReviewDialog
+            isOpen={reviewDialogOpen}
+            onClose={() => {
+              setReviewDialogOpen(false);
+              setSelectedBooking(null);
+            }}
+            bookingId={selectedBooking.id}
+            clientEmail={selectedBooking.client_email}
+            clientName={selectedBooking.client_name}
+          />
+        )}
       </div>
     </div>
   );
