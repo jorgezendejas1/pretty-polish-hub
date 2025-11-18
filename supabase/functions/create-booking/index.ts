@@ -230,6 +230,92 @@ serve(async (req) => {
       );
     }
     
+    // Send notifications asynchronously (don't block the response)
+    // Send WhatsApp notification
+    const whatsappToken = Deno.env.get('WHATSAPP_ACCESS_TOKEN');
+    const phoneNumberId = Deno.env.get('WHATSAPP_PHONE_NUMBER_ID');
+    
+    if (whatsappToken && phoneNumberId) {
+      const formattedPhone = sanitizedData.client_phone.replace(/[\s\-\+]/g, '');
+      const message = `¡Hola ${sanitizedData.client_name}! 🌸
+
+Tu reserva en Pitaya Nails ha sido confirmada ✨
+
+📅 *Fecha:* ${sanitizedData.booking_date}
+🕐 *Hora:* ${sanitizedData.booking_time}
+💅 *Servicios:* ${sanitizedData.service_names.join(', ')}
+👤 *Profesional:* ${sanitizedData.professional_name}
+
+Nos vemos pronto en Jardines del Sur 5, Cancún.
+
+¿Tienes alguna pregunta? ¡Escríbenos! 💕`;
+
+      fetch(`https://graph.facebook.com/v18.0/${phoneNumberId}/messages`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${whatsappToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messaging_product: 'whatsapp',
+          to: formattedPhone,
+          type: 'text',
+          text: { body: message },
+        }),
+      }).catch(err => console.error('WhatsApp notification error:', err));
+    }
+
+    // Send email confirmation
+    const resendApiKey = Deno.env.get('RESEND_API_KEY');
+    if (resendApiKey) {
+      fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${resendApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: 'Pitaya Nails <onboarding@resend.dev>',
+          to: [sanitizedData.client_email, 'pitayanailscancun@gmail.com'],
+          subject: '✨ Confirmación de tu reserva en Pitaya Nails',
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+              <h1 style="color: #ec4899; text-align: center;">¡Reserva Confirmada!</h1>
+              
+              <p>Hola ${sanitizedData.client_name},</p>
+              
+              <p>Tu cita ha sido confirmada exitosamente. Aquí están los detalles:</p>
+              
+              <div style="background-color: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <p><strong>📅 Fecha:</strong> ${sanitizedData.booking_date}</p>
+                <p><strong>🕐 Hora:</strong> ${sanitizedData.booking_time}</p>
+                <p><strong>💅 Servicios:</strong> ${sanitizedData.service_names.join(', ')}</p>
+                <p><strong>👤 Profesional:</strong> ${sanitizedData.professional_name}</p>
+                <p><strong>💰 Total:</strong> $${sanitizedData.total_price} MXN</p>
+                <p><strong>⏱️ Duración:</strong> ${sanitizedData.total_duration} minutos</p>
+              </div>
+              
+              <p><strong>📍 Ubicación:</strong><br>
+              Jardines del Sur 5, Cancún, Quintana Roo, C.P. 77536</p>
+              
+              <p>Recibirás un recordatorio 24 horas antes de tu cita.</p>
+              
+              <p style="margin-top: 30px; color: #6b7280; font-size: 14px;">
+                Si necesitas cancelar o reprogramar, contáctanos:<br>
+                📧 pitayanailscancun@gmail.com<br>
+                📱 WhatsApp: 998-590-0050
+              </p>
+              
+              <p style="text-align: center; margin-top: 30px; color: #ec4899; font-weight: bold;">
+                ¡Nos vemos pronto! 💕<br>
+                Equipo Pitaya Nails
+              </p>
+            </div>
+          `,
+        }),
+      }).catch(err => console.error('Email notification error:', err));
+    }
+    
     // Return booking with token for future retrieval
     return new Response(
       JSON.stringify({ 

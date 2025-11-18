@@ -224,7 +224,41 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      public_reviews: {
+        Row: {
+          booking_id: string | null
+          client_name: string | null
+          comment: string | null
+          created_at: string | null
+          id: string | null
+          rating: number | null
+        }
+        Insert: {
+          booking_id?: string | null
+          client_name?: never
+          comment?: string | null
+          created_at?: string | null
+          id?: string | null
+          rating?: number | null
+        }
+        Update: {
+          booking_id?: string | null
+          client_name?: never
+          comment?: string | null
+          created_at?: string | null
+          id?: string | null
+          rating?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       check_booking_availability: {
