@@ -3,6 +3,18 @@ import gallery1 from '@/assets/gallery-1.jpg';
 import gallery2 from '@/assets/gallery-2.jpg';
 import gallery3 from '@/assets/gallery-3.jpg';
 import gallery4 from '@/assets/gallery-4.jpg';
+import port001 from '@/assets/portfolio/port-001.jpg';
+import port002 from '@/assets/portfolio/port-002.jpg';
+import port003 from '@/assets/portfolio/port-003.jpg';
+import port004 from '@/assets/portfolio/port-004.jpg';
+import port005 from '@/assets/portfolio/port-005.jpg';
+import port006 from '@/assets/portfolio/port-006.jpg';
+import port007 from '@/assets/portfolio/port-007.jpg';
+import port008 from '@/assets/portfolio/port-008.jpg';
+import port009 from '@/assets/portfolio/port-009.jpg';
+import port010 from '@/assets/portfolio/port-010.jpg';
+import port011 from '@/assets/portfolio/port-011.jpg';
+import port012 from '@/assets/portfolio/port-012.jpg';
 
 export const SERVICES: Service[] = [
   {
