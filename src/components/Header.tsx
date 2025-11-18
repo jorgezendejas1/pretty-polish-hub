@@ -47,10 +47,12 @@ export const Header = () => {
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-20">
             {/* Logo */}
-            <Link to="/" className="flex items-center space-x-2">
-              <div className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center">
-                <span className="text-white font-display font-bold text-xl">P</span>
-              </div>
+            <Link to="/" className="flex items-center space-x-3">
+              <img 
+                src={new URL('../assets/logo-pitaya.jpeg', import.meta.url).href} 
+                alt="Pitaya Nails Logo" 
+                className="w-12 h-12 rounded-full object-cover shadow-md"
+              />
               <span className="font-display font-bold text-2xl text-foreground">
                 Pitaya Nails
               </span>

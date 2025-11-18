@@ -170,62 +170,63 @@ export const BookingFlow = ({ initialServices, onBack }: BookingFlowProps) => {
 
   const handleNext = () => {
     if (currentStep === 0) {
-      const hasCustomizable = bookingState.selectedServices.some(s => s.isCustomizable);
-      if (hasCustomizable) {
-        const allCustomized = bookingState.selectedServices
-          .filter(s => s.isCustomizable)
-          .every(s => bookingState.customizations[s.id]?.quantity > 0);
-        
-        if (!allCustomized) {
-          toast({
-            title: 'Personalización requerida',
-            description: 'Por favor especifica la cantidad para los servicios personalizables',
-            variant: 'destructive',
-          });
-          return;
+      // Validar personalización
+      for (const service of bookingState.selectedServices) {
+        if (service.isCustomizable) {
+          const customization = bookingState.customizations[service.id];
+          if (!customization || customization.quantity === 0) {
+            toast({
+              title: 'Personalización requerida',
+              description: `Por favor personaliza el servicio: ${service.name}`,
+              variant: 'destructive',
+            });
+            return;
+          }
         }
       }
     }
 
-    if (currentStep === 2 && !bookingState.selectedDate) {
-      toast({
-        title: 'Selecciona una fecha',
-        description: 'Por favor selecciona una fecha para tu cita',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    if (currentStep === 2 && !bookingState.selectedTime) {
-      toast({
-        title: 'Selecciona una hora',
-        description: 'Por favor selecciona un horario para tu cita',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    if (currentStep === 3) {
-      if (!bookingState.clientData.name || !bookingState.clientData.email || !bookingState.clientData.phone) {
+    if (currentStep === 2) {
+      if (!bookingState.selectedDate || !bookingState.selectedTime) {
         toast({
-          title: 'Datos incompletos',
-          description: 'Por favor completa todos los campos',
+          title: 'Selección incompleta',
+          description: 'Por favor selecciona fecha y hora',
           variant: 'destructive',
         });
         return;
       }
     }
 
-    setCurrentStep(currentStep + 1);
-    setBookingState({ ...bookingState, currentStep: currentStep + 1 });
+    if (currentStep === 3) {
+      if (
+        !bookingState.clientData.name ||
+        !bookingState.clientData.email ||
+        !bookingState.clientData.phone
+      ) {
+        toast({
+          title: 'Datos incompletos',
+          description: 'Por favor completa todos los campos requeridos',
+          variant: 'destructive',
+        });
+        return;
+      }
+    }
+
+    setCurrentStep((prev) => {
+      const nextStep = prev + 1;
+      // Scroll to top cuando avanzamos al siguiente paso
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return nextStep;
+    });
   };
 
   const handleBack = () => {
     if (currentStep === 0) {
       onBack();
     } else {
-      setCurrentStep(currentStep - 1);
-      setBookingState({ ...bookingState, currentStep: currentStep - 1 });
+      setCurrentStep((prev) => prev - 1);
+      // Scroll to top cuando regresamos al paso anterior
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
