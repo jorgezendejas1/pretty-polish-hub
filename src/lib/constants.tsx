@@ -98,7 +98,7 @@ export const SERVICES: Service[] = [
 export const TEAM_MEMBERS: TeamMember[] = [
   {
     id: 'lily',
-    name: 'Lily',
+    name: 'Lily Montaño',
     role: 'Nail Artist Principal',
     specialty: 'Especialista en Nail Art y Diseños 3D',
     imageUrl: gallery1,
