@@ -215,21 +215,21 @@ export const BEFORE_AFTER_IMAGES: BeforeAfterImage[] = [
 export const SALON_INFO = {
   name: 'Pitaya Nails',
   address: 'Jardines del Sur 5, Cancún, Quintana Roo, C.P. 77536',
-  phone: '+52 998 112 3411',
-  email: 'info@pitayanails.com',
+  phone: '+52 998 590 0050',
+  email: 'pitayanailscancun@gmail.com',
   hours: {
-    weekdays: 'Lun - Sab: 10:00 AM - 8:00 PM',
-    saturday: 'Lun - Sab: 10:00 AM - 8:00 PM',
+    weekdays: 'Lunes a Sábado: 10:00 AM - 7:00 PM',
+    saturday: 'Lunes a Sábado: 10:00 AM - 7:00 PM',
     sunday: 'Domingo: Cerrado',
   },
   coordinates: {
-    lat: 21.086719,
-    lng: -86.876999,
+    lat: 21.1471847,
+    lng: -86.8271523,
   },
   social: {
-    instagram: 'https://instagram.com/nailstation_cun',
-    facebook: 'https://www.facebook.com/share/17VY8FsYCU/?mibextid=wwXIfr',
-    whatsapp: 'https://wa.me/5219981123411',
+    instagram: 'https://www.instagram.com/nailstation_cun',
+    facebook: 'https://www.facebook.com/profile.php?id=61569280002188',
+    whatsapp: 'https://wa.me/5219985900050?text=Vengo%20de%20PitayaNails.com%2C%20quiero%20mas%20informacion',
   },
 };
 
