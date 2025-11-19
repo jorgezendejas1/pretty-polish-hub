@@ -24,6 +24,52 @@ import { ReviewDialog } from '@/components/ReviewDialog';
 import { ExportReportButton } from '@/components/ExportReportButton';
 import { Star } from 'lucide-react';
 
+// Componente helper para cargar imágenes con fallback
+const ImageWithFallback = ({ imagePath, alt }: { imagePath: string | null; alt: string }) => {
+  const [imageUrl, setImageUrl] = useState<string>('');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadImage = async () => {
+      if (!imagePath) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase.storage
+          .from('design-inspirations')
+          .createSignedUrl(imagePath, 3600);
+
+        if (error) throw error;
+        if (data) setImageUrl(data.signedUrl);
+      } catch (error) {
+        console.error('Error loading image:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadImage();
+  }, [imagePath]);
+
+  if (loading) {
+    return <div className="w-full h-48 bg-muted animate-pulse rounded-lg" />;
+  }
+
+  if (!imageUrl) {
+    return <div className="w-full h-48 bg-muted rounded-lg flex items-center justify-center text-muted-foreground">Imagen no disponible</div>;
+  }
+
+  return (
+    <img
+      src={imageUrl}
+      alt={alt}
+      className="w-full h-auto rounded-lg object-cover"
+    />
+  );
+};
+
 interface Booking {
   id: string;
   client_name: string;
@@ -340,9 +386,32 @@ export default function Dashboard() {
                         {isAdmin && (
                           <TableCell>
                             {booking.inspiration_images && booking.inspiration_images.length > 0 ? (
-                              <Badge variant="secondary">
-                                {booking.inspiration_images.length} imagen(es)
-                              </Badge>
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <Button variant="secondary" size="sm">
+                                    Ver {booking.inspiration_images.length} Foto(s)
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                                  <DialogHeader>
+                                    <DialogTitle>Imágenes de Inspiración</DialogTitle>
+                                  </DialogHeader>
+                                  <div className="grid grid-cols-2 gap-4 p-4">
+                                    {booking.inspiration_images.map((url: string, idx: number) => {
+                                      const pathMatch = url.match(/design-inspirations\/(.+)/);
+                                      const imagePath = pathMatch ? pathMatch[1] : null;
+                                      
+                                      return (
+                                        <ImageWithFallback
+                                          key={idx}
+                                          imagePath={imagePath}
+                                          alt={`Inspiración ${idx + 1}`}
+                                        />
+                                      );
+                                    })}
+                                  </div>
+                                </DialogContent>
+                              </Dialog>
                             ) : (
                               <span className="text-muted-foreground text-sm">-</span>
                             )}
