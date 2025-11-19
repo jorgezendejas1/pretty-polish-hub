@@ -15,7 +15,7 @@ export const Chatbot = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
-      content: '¡Hola! 👋 Soy el asistente virtual de Pitaya Nails. ¿En qué puedo ayudarte hoy?',
+      content: '¡Hola! 👋 Soy Pita, tu asistente virtual de Pitaya Nails. ¿En qué puedo ayudarte hoy?',
     },
   ]);
   const [input, setInput] = useState('');
@@ -152,7 +152,7 @@ export const Chatbot = () => {
       {isOpen && (
         <Card className="fixed bottom-6 right-6 w-96 h-[600px] shadow-elegant z-50 flex flex-col">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 border-b">
-            <CardTitle className="text-lg font-semibold">Chat con Pitaya Nails</CardTitle>
+            <CardTitle className="text-lg font-semibold">Chat con Pita</CardTitle>
             <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
               <X className="h-4 w-4" />
             </Button>
