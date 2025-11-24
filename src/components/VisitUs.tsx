@@ -80,8 +80,7 @@ export const VisitUs = () => {
                     Horario
                   </h3>
                   <div className="text-muted-foreground space-y-1">
-                    <p>Lun - Vie: {SALON_INFO.hours.weekdays}</p>
-                    <p>Sábado: {SALON_INFO.hours.saturday}</p>
+                    <p>Lunes a Sábado: {SALON_INFO.hours.weekdays}</p>
                     <p>Domingo: {SALON_INFO.hours.sunday}</p>
                   </div>
                 </div>
