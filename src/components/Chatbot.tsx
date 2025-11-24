@@ -24,15 +24,31 @@ const CONTEXTUAL_REPLIES = {
   info: ['Ver más servicios', 'Conocer al equipo', 'Ver trabajos realizados'],
 };
 
+const CHAT_STORAGE_KEY = 'pitaya_chat_history';
+
 export const Chatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([
-    {
+  
+  // Cargar historial desde localStorage
+  const [messages, setMessages] = useState<Message[]>(() => {
+    try {
+      const saved = localStorage.getItem(CHAT_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      }
+    } catch (e) {
+      console.error('Error loading chat history:', e);
+    }
+    
+    return [{
       role: 'assistant',
       content: '¡Hola! 👋 Soy Pita, tu asistente virtual de Pitaya Nails. ¿En qué puedo ayudarte hoy?',
-    },
-  ]);
+    }];
+  });
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [currentQuickReplies, setCurrentQuickReplies] = useState<string[]>(QUICK_REPLIES);
@@ -43,6 +59,15 @@ export const Chatbot = () => {
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
+
+  // Guardar mensajes en localStorage cuando cambien
+  useEffect(() => {
+    try {
+      localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(messages));
+    } catch (e) {
+      console.error('Error saving chat history:', e);
+    }
+  }, [messages]);
 
   useEffect(() => {
     scrollToBottom();
