@@ -43,7 +43,7 @@ export const SERVICES: Service[] = [
     duration: 45,
     price: 350,
     category: 'manicura',
-    imageUrl: port002,
+    imageUrl: port019,
   },
   {
     id: 'mani-gel',
@@ -70,7 +70,7 @@ export const SERVICES: Service[] = [
     duration: 30,
     price: 150,
     category: 'nail-art',
-    imageUrl: port001,
+    imageUrl: port029,
     isCustomizable: true,
     customizationPrompt: '¿Cuántas uñas deseas decorar?',
     pricePerUnit: 150,
@@ -92,7 +92,7 @@ export const SERVICES: Service[] = [
     duration: 110,
     price: 900,
     category: 'esculturales',
-    imageUrl: port006,
+    imageUrl: port010,
   },
   {
     id: 'removal',
@@ -101,7 +101,7 @@ export const SERVICES: Service[] = [
     duration: 30,
     price: 200,
     category: 'tratamientos',
-    imageUrl: port007,
+    imageUrl: '',
   },
   {
     id: 'pack-mani-pedi',
