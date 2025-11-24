@@ -21,8 +21,8 @@ export const Footer = () => {
               <div className="flex items-start space-x-2">
                 <Clock className="h-4 w-4 mt-1 flex-shrink-0" />
                 <div>
-                  <p>{SALON_INFO.hours.weekdays}</p>
-                  <p>{SALON_INFO.hours.sunday}</p>
+                  <p>Lunes a Sábado: {SALON_INFO.hours.weekdays}</p>
+                  <p>Domingo: {SALON_INFO.hours.sunday}</p>
                 </div>
               </div>
             </div>

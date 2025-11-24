@@ -84,6 +84,7 @@ const ImageEditor = () => {
           title: '¡Listo!',
           description: 'Tu imagen ha sido editada con éxito',
         });
+        // No limpiar el prompt para permitir múltiples ediciones
       } else {
         throw new Error('No se recibió imagen editada');
       }
@@ -96,6 +97,24 @@ const ImageEditor = () => {
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleNewImage = () => {
+    setOriginalImage(null);
+    setEditedImage(null);
+    setPrompt('');
+  };
+
+  const handleUseEdited = () => {
+    if (editedImage) {
+      setOriginalImage(editedImage);
+      setEditedImage(null);
+      setPrompt('');
+      toast({
+        title: 'Imagen actualizada',
+        description: 'Ahora puedes aplicar nuevos cambios a esta imagen',
+      });
     }
   };
 
@@ -184,14 +203,30 @@ const ImageEditor = () => {
                   </Button>
 
                   {editedImage && (
-                    <Button 
-                      onClick={handleDownload} 
-                      className="w-full" 
-                      variant="outline"
-                    >
-                      <Download className="h-4 w-4 mr-2" />
-                      Descargar Imagen
-                    </Button>
+                    <>
+                      <Button 
+                        onClick={handleDownload} 
+                        className="w-full" 
+                        variant="outline"
+                      >
+                        <Download className="h-4 w-4 mr-2" />
+                        Descargar Imagen
+                      </Button>
+                      <Button
+                        onClick={handleUseEdited}
+                        className="w-full gradient-primary text-white"
+                      >
+                        <Wand2 className="h-4 w-4 mr-2" />
+                        Usar Imagen Editada
+                      </Button>
+                      <Button
+                        onClick={handleNewImage}
+                        className="w-full"
+                        variant="secondary"
+                      >
+                        Nueva Imagen
+                      </Button>
+                    </>
                   )}
                 </CardContent>
               </Card>
