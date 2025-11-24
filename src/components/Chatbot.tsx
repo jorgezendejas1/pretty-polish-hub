@@ -2,8 +2,18 @@ import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { MessageCircle, X, Send } from 'lucide-react';
+import { MessageCircle, X, Send, Trash2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Message {
   role: 'user' | 'assistant';
@@ -52,12 +62,69 @@ export const Chatbot = () => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [currentQuickReplies, setCurrentQuickReplies] = useState<string[]>(QUICK_REPLIES);
+  const [showClearDialog, setShowClearDialog] = useState(false);
+  const [userSentiment, setUserSentiment] = useState<'neutral' | 'frustrated' | 'happy'>('neutral');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const autoOpenTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const clearChatHistory = () => {
+    localStorage.removeItem(CHAT_STORAGE_KEY);
+    setMessages([{
+      role: 'assistant',
+      content: '¡Hola! 👋 Soy Pita, tu asistente virtual de Pitaya Nails. ¿En qué puedo ayudarte hoy?',
+    }]);
+    setCurrentQuickReplies(QUICK_REPLIES);
+    setUserSentiment('neutral');
+    setShowClearDialog(false);
+    toast({
+      title: 'Historial limpio',
+      description: 'Conversación reiniciada exitosamente',
+    });
+  };
+
+  const analyzeSentiment = (text: string): 'neutral' | 'frustrated' | 'happy' => {
+    const lowerText = text.toLowerCase();
+    
+    // Palabras que indican frustración
+    const frustratedWords = [
+      'no funciona', 'no sirve', 'problema', 'malo', 'terrible', 'pésimo',
+      'frustrado', 'molesto', 'enojado', 'cansado', 'harto', 'nunca',
+      'siempre falla', 'no entiendo', 'ayuda', 'urgente', 'ya no', 'basta',
+      'demasiado', 'complicado', 'difícil', 'imposible', 'error'
+    ];
+    
+    // Palabras que indican felicidad/satisfacción
+    const happyWords = [
+      'gracias', 'excelente', 'perfecto', 'genial', 'bueno', 'bien',
+      'encanta', 'maravilloso', 'increíble', 'fantástico', 'amor',
+      'contento', 'feliz', 'satisfecho', 'super', 'wow'
+    ];
+    
+    const hasFrustratedWords = frustratedWords.some(word => lowerText.includes(word));
+    const hasHappyWords = happyWords.some(word => lowerText.includes(word));
+    
+    // Detectar signos de exclamación múltiples (indica frustración o emoción fuerte)
+    const hasMultipleExclamations = (text.match(/!/g) || []).length >= 2;
+    
+    // Detectar mayúsculas excesivas (indica gritos/frustración)
+    const hasExcessiveCaps = text.split(' ').filter(word => 
+      word.length > 3 && word === word.toUpperCase()
+    ).length > 1;
+    
+    if (hasFrustratedWords || hasExcessiveCaps || (hasMultipleExclamations && !hasHappyWords)) {
+      return 'frustrated';
+    }
+    
+    if (hasHappyWords) {
+      return 'happy';
+    }
+    
+    return 'neutral';
   };
 
   // Guardar mensajes en localStorage cuando cambien
@@ -114,6 +181,10 @@ export const Chatbot = () => {
 
     setInput('');
     
+    // Analizar sentimiento del mensaje
+    const sentiment = analyzeSentiment(userMessage);
+    setUserSentiment(sentiment);
+    
     const newMessages = [...messages, { role: 'user' as const, content: userMessage }];
     setMessages(newMessages);
     setIsLoading(true);
@@ -133,7 +204,10 @@ export const Chatbot = () => {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
-        body: JSON.stringify({ messages: apiMessages }),
+        body: JSON.stringify({ 
+          messages: apiMessages,
+          sentiment: sentiment // Enviar sentimiento al backend
+        }),
       });
 
       if (response.status === 429) {
@@ -245,10 +319,28 @@ export const Chatbot = () => {
       {isOpen && (
         <Card className="fixed bottom-6 right-6 w-96 h-[600px] shadow-elegant z-50 flex flex-col">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 border-b">
-            <CardTitle className="text-lg font-semibold">Chat con Pita</CardTitle>
-            <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
-              <X className="h-4 w-4" />
-            </Button>
+            <CardTitle className="text-lg font-semibold">
+              Chat con Pita
+              {userSentiment === 'frustrated' && (
+                <span className="ml-2 text-xs text-orange-500">😔 Detecté que estás frustrado</span>
+              )}
+              {userSentiment === 'happy' && (
+                <span className="ml-2 text-xs text-green-500">😊 Me alegra ayudarte</span>
+              )}
+            </CardTitle>
+            <div className="flex gap-1">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => setShowClearDialog(true)}
+                title="Limpiar historial"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
           </CardHeader>
           
           <CardContent className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -333,6 +425,23 @@ export const Chatbot = () => {
           </div>
         </Card>
       )}
+
+      <AlertDialog open={showClearDialog} onOpenChange={setShowClearDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Limpiar historial del chat?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esto eliminará toda la conversación actual y comenzarás una nueva desde cero. Esta acción no se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={clearChatHistory} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Limpiar historial
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 };
