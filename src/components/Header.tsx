@@ -200,10 +200,15 @@ export const Header = () => {
                 </div>
 
                 <div className="pt-4 space-y-2 text-sm text-muted-foreground">
-                  <p className="flex items-center">
+                  <a 
+                    href={SALON_INFO.social.whatsapp}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center hover:text-primary transition-smooth"
+                  >
                     <Phone className="h-4 w-4 mr-2" />
                     {SALON_INFO.phone}
-                  </p>
+                  </a>
                   <p>{SALON_INFO.address}</p>
                 </div>
               </div>

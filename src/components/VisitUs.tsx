@@ -39,10 +39,12 @@ export const VisitUs = () => {
                 </div>
                 <div>
                   <h3 className="font-display font-semibold text-lg mb-2">
-                    Teléfono
+                    Teléfono / WhatsApp
                   </h3>
                   <a
-                    href={`tel:${SALON_INFO.phone}`}
+                    href={SALON_INFO.social.whatsapp}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="text-muted-foreground hover:text-primary transition-smooth"
                   >
                     {SALON_INFO.phone}
