@@ -25,6 +25,7 @@ import { ExportReportButton } from '@/components/ExportReportButton';
 import { PortfolioUpload } from '@/components/PortfolioUpload';
 import { PortfolioApproval } from '@/components/PortfolioApproval';
 import { AnalyticsDashboard } from '@/components/AnalyticsDashboard';
+import { LoyaltyCard } from '@/components/LoyaltyCard';
 import { Star } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
@@ -287,6 +288,8 @@ export default function Dashboard() {
         </div>
 
         {isAdmin && <AdminStats />}
+
+        {!isAdmin && <LoyaltyCard />}
 
         <Tabs defaultValue="bookings" className="space-y-6">
           <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4">

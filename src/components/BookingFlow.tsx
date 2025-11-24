@@ -43,10 +43,35 @@ export const BookingFlow = ({ initialServices, onBack }: BookingFlowProps) => {
 
   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isEligibleForFreeVisit, setIsEligibleForFreeVisit] = useState(false);
 
   useEffect(() => {
     localStorage.setItem('bookingState', JSON.stringify(bookingState));
   }, [bookingState]);
+
+  // Verificar elegibilidad para visita gratis
+  useEffect(() => {
+    checkLoyaltyEligibility();
+  }, []);
+
+  const checkLoyaltyEligibility = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const { data } = await supabase
+        .from('loyalty_rewards')
+        .select('visits_count')
+        .eq('user_id', session.user.id)
+        .maybeSingle();
+
+      if (data && data.visits_count >= 7) {
+        setIsEligibleForFreeVisit(true);
+      }
+    } catch (error) {
+      console.error('Error checking loyalty:', error);
+    }
+  };
 
   // Auto-fill user data if authenticated
   useEffect(() => {
@@ -84,7 +109,7 @@ export const BookingFlow = ({ initialServices, onBack }: BookingFlowProps) => {
     return sum + service.duration;
   }, 0);
 
-  const totalPrice = bookingState.selectedServices.reduce((sum, service) => {
+  const totalPrice = isEligibleForFreeVisit ? 0 : bookingState.selectedServices.reduce((sum, service) => {
     const customization = bookingState.customizations[service.id];
     if (service.isCustomizable && customization?.quantity) {
       return sum + (service.pricePerUnit || 0) * customization.quantity;
@@ -854,8 +879,24 @@ END:VCALENDAR`;
                     <DollarSign className="h-4 w-4 text-primary" />
                     Precio total
                   </span>
-                  <span className="font-semibold text-lg">${totalPrice}</span>
+                  {isEligibleForFreeVisit ? (
+                    <div className="text-right">
+                      <span className="line-through text-muted-foreground text-sm mr-2">
+                        ${bookingState.selectedServices.reduce((sum, s) => sum + s.price, 0)}
+                      </span>
+                      <span className="font-bold text-2xl text-primary">GRATIS</span>
+                    </div>
+                  ) : (
+                    <span className="font-semibold text-lg">${totalPrice}</span>
+                  )}
                 </div>
+                {isEligibleForFreeVisit && (
+                  <div className="mt-3 p-3 bg-primary/10 border border-primary/20 rounded-lg">
+                    <p className="text-sm text-primary font-semibold text-center">
+                      🎉 ¡Felicidades! Esta visita es gratis por tu lealtad 🎉
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
 

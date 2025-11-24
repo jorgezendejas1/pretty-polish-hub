@@ -4,6 +4,7 @@ import { SERVICES } from '@/lib/constants';
 import { Service } from '@/types';
 import { ServiceCard } from '@/components/ServiceCard';
 import { BookingFlow } from '@/components/BookingFlow';
+import { LoyaltyBanner } from '@/components/LoyaltyBanner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -81,6 +82,11 @@ const Services = () => {
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Selecciona los servicios que deseas y reserva tu cita
           </p>
+        </div>
+
+        {/* Loyalty Banner */}
+        <div className="mb-8">
+          <LoyaltyBanner />
         </div>
 
         {/* Filters */}
