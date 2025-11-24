@@ -290,14 +290,33 @@ serve(async (req) => {
       );
     }
 
-    const { messages } = await req.json();
+    const { messages, sentiment } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     
     if (!LOVABLE_API_KEY) {
       throw new Error('LOVABLE_API_KEY is not configured');
     }
 
-    const systemPrompt = `Eres "Pita", la asistente virtual altamente inteligente y sofisticada de "Pitaya Nails", un salón de uñas premium en Cancún, México.
+    // Adaptar el prompt basado en el sentimiento del usuario
+    let sentimentModifier = '';
+    if (sentiment === 'frustrated') {
+      sentimentModifier = `\n\n🚨 ALERTA DE SENTIMIENTO: El cliente muestra signos de frustración o molestia. Adapta tu respuesta para ser:
+- Extra empática y comprensiva
+- Más directa y eficiente (menos rodeos)
+- Ofrecer soluciones inmediatas o alternativas
+- Validar sus sentimientos antes de continuar
+- Si es apropiado, ofrecer contacto humano directo (WhatsApp/teléfono)
+- Usar un tono más cálido y reconfortante
+Ejemplo: "Entiendo perfectamente tu frustración. Déjame ayudarte a resolverlo de inmediato..."`;
+    } else if (sentiment === 'happy') {
+      sentimentModifier = `\n\n😊 SENTIMIENTO POSITIVO: El cliente está contento. Mantén:
+- El mismo tono positivo y entusiasta
+- Refuerza la experiencia positiva
+- Aprovecha para sugerir servicios adicionales si es apropiado
+Ejemplo: "¡Me encanta tu entusiasmo! Definitivamente te va a encantar el resultado..."`;
+    }
+
+    const systemPrompt = `Eres "Pita", la asistente virtual altamente inteligente y sofisticada de "Pitaya Nails", un salón de uñas premium en Cancún, México.${sentimentModifier}
 
 ## IDENTIDAD Y PERSONALIDAD
 Eres Pita, una asistente con capacidades cognitivas avanzadas comparables a los mejores modelos de IA del mercado. Tu personalidad combina:
