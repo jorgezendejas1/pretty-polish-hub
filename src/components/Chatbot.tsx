@@ -10,8 +10,16 @@ interface Message {
   content: string;
 }
 
+const QUICK_REPLIES = [
+  '¿Qué servicios ofrecen?',
+  'Quiero agendar una cita',
+  '¿Cuál es su ubicación?',
+  'Ver precios',
+];
+
 export const Chatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [hasInteracted, setHasInteracted] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
@@ -20,8 +28,10 @@ export const Chatbot = () => {
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showQuickReplies, setShowQuickReplies] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const autoOpenTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -31,11 +41,47 @@ export const Chatbot = () => {
     scrollToBottom();
   }, [messages]);
 
+  // Auto-open chatbot after 15 seconds if no interaction
+  useEffect(() => {
+    const handleUserInteraction = () => {
+      setHasInteracted(true);
+      if (autoOpenTimerRef.current) {
+        clearTimeout(autoOpenTimerRef.current);
+      }
+    };
+
+    window.addEventListener('click', handleUserInteraction);
+    window.addEventListener('scroll', handleUserInteraction);
+    window.addEventListener('touchstart', handleUserInteraction);
+
+    if (!hasInteracted && !isOpen) {
+      autoOpenTimerRef.current = setTimeout(() => {
+        setIsOpen(true);
+        setMessages([
+          {
+            role: 'assistant',
+            content: '¡Hola! 👋 Soy Pita de Pitaya Nails. Veo que estás explorando nuestros servicios. ¿Te gustaría conocer nuestros servicios más populares o agendar una cita?',
+          },
+        ]);
+      }, 15000);
+    }
+
+    return () => {
+      window.removeEventListener('click', handleUserInteraction);
+      window.removeEventListener('scroll', handleUserInteraction);
+      window.removeEventListener('touchstart', handleUserInteraction);
+      if (autoOpenTimerRef.current) {
+        clearTimeout(autoOpenTimerRef.current);
+      }
+    };
+  }, [hasInteracted, isOpen]);
+
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
 
     const userMessage = input.trim();
     setInput('');
+    setShowQuickReplies(false);
     
     const newMessages = [...messages, { role: 'user' as const, content: userMessage }];
     setMessages(newMessages);
@@ -135,6 +181,12 @@ export const Chatbot = () => {
     }
   };
 
+  const handleQuickReply = (reply: string) => {
+    setInput(reply);
+    setShowQuickReplies(false);
+    setTimeout(() => handleSend(), 100);
+  };
+
   return (
     <>
       {/* FAB Button */}
@@ -194,6 +246,22 @@ export const Chatbot = () => {
                 </div>
               </div>
             )}
+            {showQuickReplies && messages.length === 1 && (
+              <div className="flex flex-col gap-2 mt-4">
+                <p className="text-xs text-muted-foreground mb-1">Respuestas rápidas:</p>
+                {QUICK_REPLIES.map((reply, index) => (
+                  <Button
+                    key={index}
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleQuickReply(reply)}
+                    className="text-left justify-start h-auto py-2 px-3 text-sm"
+                  >
+                    {reply}
+                  </Button>
+                ))}
+              </div>
+            )}
             <div ref={messagesEndRef} />
           </CardContent>
 
@@ -203,7 +271,11 @@ export const Chatbot = () => {
                 ref={inputRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    handleSend();
+                  }
+                }}
                 placeholder="Escribe tu mensaje..."
                 disabled={isLoading}
               />
