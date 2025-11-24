@@ -163,6 +163,15 @@ export const BookingFlow = ({ initialServices, onBack }: BookingFlowProps) => {
 
   const handleDateSelect = async (date: Date | undefined) => {
     if (date) {
+      // Bloquear domingos (day 0)
+      if (date.getDay() === 0) {
+        toast({
+          title: 'Día no disponible',
+          description: 'Los domingos el salón está cerrado',
+          variant: 'destructive',
+        });
+        return;
+      }
       setBookingState({ ...bookingState, selectedDate: date, selectedTime: null });
       await generateAvailableTimes();
     }
@@ -637,8 +646,9 @@ END:VCALENDAR`;
                 disabled={(date) => {
                   const day = date.getDay();
                   const isPast = date < new Date(new Date().setHours(0, 0, 0, 0));
+                  const isSunday = day === 0; // Bloquear domingos (cerrado)
                   const isUnavailable = bookingState.selectedProfessional?.unavailableDays.includes(day);
-                  return isPast || isUnavailable || false;
+                  return isPast || isSunday || isUnavailable || false;
                 }}
                 locale={es}
                 className="rounded-md border mx-auto"

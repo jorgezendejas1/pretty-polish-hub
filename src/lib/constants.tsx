@@ -366,8 +366,8 @@ export const SALON_INFO = {
   phone: '+52 998 590 0050',
   email: 'pitayanailscancun@gmail.com',
   hours: {
-    weekdays: '10:00 AM - 7:00 PM',
-    saturday: '10:00 AM - 7:00 PM',
+    weekdays: '10:00 AM - 9:00 PM',
+    saturday: '10:00 AM - 9:00 PM',
     sunday: 'Cerrado',
   },
   coordinates: {
