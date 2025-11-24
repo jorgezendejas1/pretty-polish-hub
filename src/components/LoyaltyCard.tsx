@@ -29,6 +29,7 @@ export const LoyaltyCard = () => {
       // Solo activar celebración si acabamos de alcanzar 7+ visitas
       if (previousVisitsRef.current < 7) {
         triggerCelebration();
+        notifyAdmins();
         celebrationTriggeredRef.current = true;
       }
     }
@@ -36,6 +37,37 @@ export const LoyaltyCard = () => {
       previousVisitsRef.current = loyaltyData.visits_count;
     }
   }, [loyaltyData]);
+
+  const notifyAdmins = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      // Obtener información del cliente
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('id', session.user.id)
+        .single();
+
+      const clientName = profile?.full_name || session.user.email?.split('@')[0] || 'Cliente';
+      const clientEmail = session.user.email || '';
+
+      // Llamar a la edge function para notificar a los admins
+      await supabase.functions.invoke('notify-admins-reward', {
+        body: {
+          clientName,
+          clientEmail,
+          visitsCount: loyaltyData?.visits_count || 7,
+        },
+      });
+
+      console.log('Admin notifications sent successfully');
+    } catch (error) {
+      console.error('Error notifying admins:', error);
+      // No mostramos error al usuario ya que es una notificación en background
+    }
+  };
 
   const triggerCelebration = () => {
     setShowCelebration(true);
