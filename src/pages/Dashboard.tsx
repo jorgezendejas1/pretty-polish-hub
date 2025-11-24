@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Calendar, Clock, DollarSign, User, Mail, Phone, ArrowLeft, Shield, Edit, X } from 'lucide-react';
+import { Calendar, Clock, DollarSign, User, Mail, Phone, ArrowLeft, Shield, Edit, X, CheckCircle, Info } from 'lucide-react';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
@@ -28,6 +28,14 @@ import { AnalyticsDashboard } from '@/components/AnalyticsDashboard';
 import { LoyaltyCard } from '@/components/LoyaltyCard';
 import { Star } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 // Componente helper para cargar imágenes con fallback
 const ImageWithFallback = ({ imagePath, alt }: { imagePath: string | null; alt: string }) => {
@@ -226,6 +234,30 @@ export default function Dashboard() {
     }
   };
 
+  const handleStatusChange = async (bookingId: string, newStatus: string) => {
+    try {
+      const { error } = await supabase
+        .from('bookings')
+        .update({ status: newStatus })
+        .eq('id', bookingId);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Estado actualizado',
+        description: `La reserva ha sido marcada como ${newStatus === 'completed' ? 'completada' : newStatus === 'confirmed' ? 'confirmada' : newStatus === 'cancelled' ? 'cancelada' : 'pendiente'}`,
+      });
+
+      checkAuthAndLoadBookings();
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'No se pudo actualizar el estado',
+        variant: 'destructive',
+      });
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     const variants: Record<string, any> = {
       pending: 'default',
@@ -300,6 +332,24 @@ export default function Dashboard() {
           </TabsList>
 
           <TabsContent value="bookings">
+            {isAdmin && (
+              <Alert className="mb-6 border-primary/20 bg-primary/5">
+                <Info className="h-4 w-4" />
+                <AlertTitle>Sistema Automático de Estados Activo</AlertTitle>
+                <AlertDescription className="space-y-2 text-sm">
+                  <p>El sistema actualiza automáticamente los estados de las reservas cada hora:</p>
+                  <ul className="list-disc list-inside space-y-1 ml-2">
+                    <li><strong>Completado automáticamente:</strong> 2 horas después de la hora programada de la cita</li>
+                    <li><strong>Cancelado automáticamente:</strong> Si la reserva sigue en "Pendiente" 24 horas antes de la cita</li>
+                    <li><strong>Notificación de reseña:</strong> Se envía automáticamente cuando una cita se marca como completada</li>
+                    <li><strong>Programa de lealtad:</strong> Se actualiza automáticamente al completarse una cita (trigger en base de datos)</li>
+                  </ul>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Puedes cambiar el estado manualmente usando el selector desplegable en la columna "Estado" si es necesario.
+                  </p>
+                </AlertDescription>
+              </Alert>
+            )}
             <Card className="shadow-elegant">
           <CardHeader>
             <CardTitle className="text-2xl font-bold">
@@ -398,7 +448,27 @@ export default function Dashboard() {
                             {booking.total_price}
                           </div>
                         </TableCell>
-                        <TableCell>{getStatusBadge(booking.status)}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            {getStatusBadge(booking.status)}
+                            {isAdmin && (
+                              <Select
+                                value={booking.status}
+                                onValueChange={(value) => handleStatusChange(booking.id, value)}
+                              >
+                                <SelectTrigger className="w-[140px] h-8">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="pending">Pendiente</SelectItem>
+                                  <SelectItem value="confirmed">Confirmada</SelectItem>
+                                  <SelectItem value="completed">Completada</SelectItem>
+                                  <SelectItem value="cancelled">Cancelada</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            )}
+                          </div>
+                        </TableCell>
                         {isAdmin && (
                           <TableCell>
                             {booking.inspiration_images && booking.inspiration_images.length > 0 ? (
