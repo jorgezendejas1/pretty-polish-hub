@@ -25,6 +25,15 @@ import port019 from '@/assets/portfolio/port-019.jpg';
 import port020 from '@/assets/portfolio/port-020.jpg';
 import port021 from '@/assets/portfolio/port-021.jpg';
 import port022 from '@/assets/portfolio/port-022.jpg';
+import port023 from '@/assets/portfolio/port-023.jpg';
+import port024 from '@/assets/portfolio/port-024.jpg';
+import port025 from '@/assets/portfolio/port-025.jpg';
+import port026 from '@/assets/portfolio/port-026.jpg';
+import port027 from '@/assets/portfolio/port-027.jpg';
+import port028 from '@/assets/portfolio/port-028.jpg';
+import port029 from '@/assets/portfolio/port-029.jpg';
+import port030 from '@/assets/portfolio/port-030.jpg';
+import port031 from '@/assets/portfolio/port-031.jpg';
 
 export const SERVICES: Service[] = [
   {
@@ -261,6 +270,42 @@ export const PORTFOLIO_IMAGES: PortfolioImage[] = [
     src: port019,
     alt: 'Uñas con glitter plateado en degradado',
     category: 'manicura',
+  },
+  {
+    id: 'port-025',
+    src: port025,
+    alt: 'Pedicura con glitter dorado en pies',
+    category: 'pedicura',
+  },
+  {
+    id: 'port-026',
+    src: port026,
+    alt: 'Uñas rojas con diseño floral y glitter dorado',
+    category: 'nail-art',
+  },
+  {
+    id: 'port-027',
+    src: port027,
+    alt: 'Diseño navideño con Santa Claus',
+    category: 'nail-art',
+  },
+  {
+    id: 'port-029',
+    src: port029,
+    alt: 'French tips con diseño floral colorido',
+    category: 'nail-art',
+  },
+  {
+    id: 'port-030',
+    src: port030,
+    alt: 'Pedicura con diseño animal print',
+    category: 'pedicura',
+  },
+  {
+    id: 'port-031',
+    src: port031,
+    alt: 'Diseño tropical colorido con hojas y flores',
+    category: 'nail-art',
   },
 ];
 
