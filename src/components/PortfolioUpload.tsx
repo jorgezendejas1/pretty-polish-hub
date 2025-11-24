@@ -77,10 +77,16 @@ export const PortfolioUpload = () => {
 
       if (uploadError) throw uploadError;
 
-      // Obtener URL pública
-      const { data: { publicUrl } } = supabase.storage
+      // Generate signed URL (valid for 1 year for portfolio submissions)
+      const { data: signedUrlData, error: urlError } = await supabase.storage
         .from('design-inspirations')
-        .getPublicUrl(filePath);
+        .createSignedUrl(filePath, 31536000); // 1 year validity
+
+      if (urlError || !signedUrlData) {
+        throw new Error('Error al generar URL segura de imagen');
+      }
+
+      const publicUrl = signedUrlData.signedUrl;
 
       // Crear registro en la tabla
       const { error: insertError } = await supabase

@@ -291,6 +291,57 @@ serve(async (req) => {
     }
 
     const { messages, sentiment } = await req.json();
+    
+    // Input validation
+    if (!messages || !Array.isArray(messages) || messages.length === 0) {
+      return new Response(
+        JSON.stringify({ error: 'Formato de mensaje inválido' }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
+    }
+    
+    // Validate last message length (max 1000 characters)
+    const lastMessage = messages[messages.length - 1];
+    if (!lastMessage?.content || typeof lastMessage.content !== 'string') {
+      return new Response(
+        JSON.stringify({ error: 'Mensaje inválido' }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
+    }
+    
+    if (lastMessage.content.length > 1000) {
+      return new Response(
+        JSON.stringify({ error: 'El mensaje es demasiado largo. Por favor limita tu mensaje a 1000 caracteres.' }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
+    }
+    
+    // Basic sanitization - remove suspicious patterns
+    const suspiciousPatterns = [
+      /ignore\s+(previous|all)\s+instructions?/i,
+      /system\s*:\s*/i,
+      /you\s+are\s+now\s+/i,
+      /\[system\]/i,
+      /\<system\>/i,
+    ];
+    
+    const hasSuspiciousContent = suspiciousPatterns.some(pattern => 
+      pattern.test(lastMessage.content)
+    );
+    
+    if (hasSuspiciousContent) {
+      console.warn(`Suspicious content detected from IP ${clientIP}`);
+      // Don't block, but log for monitoring
+    }
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     
     if (!LOVABLE_API_KEY) {

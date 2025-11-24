@@ -530,11 +530,22 @@ END:VCALENDAR`;
                                 continue;
                               }
 
-                              const { data: { publicUrl } } = supabase.storage
+                              // Generate signed URL (valid for 1 year for booking references)
+                              const { data: signedUrlData, error: urlError } = await supabase.storage
                                 .from('design-inspirations')
-                                .getPublicUrl(filePath);
+                                .createSignedUrl(filePath, 31536000); // 1 year validity
 
-                              uploadedUrls.push(publicUrl);
+                              if (urlError || !signedUrlData) {
+                                console.error('Error generating signed URL:', urlError);
+                                toast({
+                                  title: 'Error',
+                                  description: 'No se pudo procesar la imagen',
+                                  variant: 'destructive',
+                                });
+                                continue;
+                              }
+
+                              uploadedUrls.push(signedUrlData.signedUrl);
                             }
 
                             setBookingState({
