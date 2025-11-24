@@ -172,20 +172,20 @@ export const PORTFOLIO_IMAGES: PortfolioImage[] = [
   {
     id: 'port-003',
     src: port003,
-    alt: 'Uñas acrílicas perfectas',
-    category: 'esculturales',
+    alt: 'Equipos y productos profesionales',
+    category: 'equipos-productos',
   },
   {
     id: 'port-004',
     src: port004,
-    alt: 'Diseño creativo',
-    category: 'nail-art',
+    alt: 'Productos de calidad para nail art',
+    category: 'equipos-productos',
   },
   {
     id: 'port-005',
     src: port005,
-    alt: 'Acabado brillante',
-    category: 'manicura',
+    alt: 'Herramientas profesionales del salón',
+    category: 'equipos-productos',
   },
   {
     id: 'port-006',
