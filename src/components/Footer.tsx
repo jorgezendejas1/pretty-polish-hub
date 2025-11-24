@@ -114,7 +114,9 @@ export const Footer = () => {
               <li className="flex items-center space-x-2">
                 <Phone className="h-4 w-4 flex-shrink-0" />
                 <a
-                  href={`tel:${SALON_INFO.phone}`}
+                  href={SALON_INFO.social.whatsapp}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="hover:text-primary transition-smooth"
                 >
                   {SALON_INFO.phone}

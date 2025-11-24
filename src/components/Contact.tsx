@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { MapPin, Phone, Mail, Clock, MessageSquare } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { SALON_INFO } from "@/lib/constants";
 
 export const Contact = () => {
   const navigate = useNavigate();
@@ -33,9 +34,8 @@ export const Contact = () => {
     setIsSubmitting(true);
 
     // Send WhatsApp message
-    const whatsappNumber = "529981234567";
     const whatsappMessage = `Hola, soy ${formData.name}. ${formData.message}`;
-    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`;
+    const whatsappUrl = `${SALON_INFO.social.whatsapp}&text=${encodeURIComponent(whatsappMessage)}`;
     
     window.open(whatsappUrl, '_blank');
 
@@ -49,10 +49,7 @@ export const Contact = () => {
   };
 
   const handleWhatsAppClick = () => {
-    const whatsappNumber = "529981234567";
-    const message = "Mas Info";
-    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
+    window.open(SALON_INFO.social.whatsapp, '_blank');
   };
 
   return (
