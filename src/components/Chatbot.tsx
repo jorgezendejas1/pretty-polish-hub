@@ -226,6 +226,7 @@ export const Chatbot = () => {
                     className="text-sm whitespace-pre-wrap prose prose-sm dark:prose-invert max-w-none"
                     dangerouslySetInnerHTML={{ 
                       __html: message.content
+                        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-primary underline hover:text-primary/80 font-medium" target="_self">$1</a>')
                         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                         .replace(/\*(.*?)\*/g, '<em>$1</em>')
                         .replace(/\n/g, '<br/>')
