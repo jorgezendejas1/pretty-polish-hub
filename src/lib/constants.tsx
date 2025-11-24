@@ -43,7 +43,7 @@ export const SERVICES: Service[] = [
     duration: 45,
     price: 350,
     category: 'manicura',
-    imageUrl: gallery1,
+    imageUrl: port002,
   },
   {
     id: 'mani-gel',
@@ -52,7 +52,7 @@ export const SERVICES: Service[] = [
     duration: 60,
     price: 450,
     category: 'manicura',
-    imageUrl: gallery2,
+    imageUrl: port011,
   },
   {
     id: 'pedi-spa',
@@ -61,7 +61,7 @@ export const SERVICES: Service[] = [
     duration: 75,
     price: 500,
     category: 'pedicura',
-    imageUrl: gallery3,
+    imageUrl: port025,
   },
   {
     id: 'nail-art',
@@ -70,7 +70,7 @@ export const SERVICES: Service[] = [
     duration: 30,
     price: 150,
     category: 'nail-art',
-    imageUrl: gallery4,
+    imageUrl: port001,
     isCustomizable: true,
     customizationPrompt: '¿Cuántas uñas deseas decorar?',
     pricePerUnit: 150,
@@ -83,7 +83,7 @@ export const SERVICES: Service[] = [
     duration: 120,
     price: 800,
     category: 'esculturales',
-    imageUrl: gallery1,
+    imageUrl: port008,
   },
   {
     id: 'polygel',
@@ -92,7 +92,7 @@ export const SERVICES: Service[] = [
     duration: 110,
     price: 900,
     category: 'esculturales',
-    imageUrl: gallery2,
+    imageUrl: port006,
   },
   {
     id: 'removal',
@@ -101,16 +101,7 @@ export const SERVICES: Service[] = [
     duration: 30,
     price: 200,
     category: 'tratamientos',
-    imageUrl: gallery3,
-  },
-  {
-    id: 'paraffin',
-    name: 'Tratamiento de Parafina',
-    description: 'Hidratación profunda para manos suaves y rejuvenecidas.',
-    duration: 30,
-    price: 250,
-    category: 'tratamientos',
-    imageUrl: gallery4,
+    imageUrl: port007,
   },
 ];
 
