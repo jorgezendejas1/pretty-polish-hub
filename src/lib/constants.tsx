@@ -103,6 +103,42 @@ export const SERVICES: Service[] = [
     category: 'tratamientos',
     imageUrl: port007,
   },
+  {
+    id: 'pack-mani-pedi',
+    name: 'Paquete Mani + Pedi Clásico',
+    description: 'Manicura y Pedicura completas con esmaltado tradicional. ¡Ahorra $100!',
+    duration: 120,
+    price: 750,
+    category: 'paquetes',
+    imageUrl: port018,
+  },
+  {
+    id: 'pack-gel-complete',
+    name: 'Paquete Gel Completo',
+    description: 'Manicura y Pedicura en Gel semipermanente. ¡Ahorra $150!',
+    duration: 135,
+    price: 800,
+    category: 'paquetes',
+    imageUrl: port019,
+  },
+  {
+    id: 'pack-acrylic-art',
+    name: 'Paquete Acrílico + Nail Art',
+    description: 'Extensión con acrílico + diseño personalizado en 3 uñas. ¡Ahorra $100!',
+    duration: 150,
+    price: 850,
+    category: 'paquetes',
+    imageUrl: port009,
+  },
+  {
+    id: 'pack-luxury',
+    name: 'Paquete Luxury Experience',
+    description: 'Manicura Gel + Pedicura Spa + Nail Art en 5 uñas. ¡Ahorra $200!',
+    duration: 165,
+    price: 1100,
+    category: 'paquetes',
+    imageUrl: port015,
+  },
 ];
 
 export const TEAM_MEMBERS: TeamMember[] = [
