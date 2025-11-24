@@ -19,6 +19,7 @@ All colors MUST be HSL.
 
     --primary: 340 65% 55%;
     --primary-foreground: 0 0% 100%;
+    --primary-glow: 340 65% 75%;
 
     --secondary: 270 45% 70%;
     --secondary-foreground: 340 15% 15%;
@@ -47,6 +48,7 @@ All colors MUST be HSL.
     --shadow-elegant: 0 4px 20px -4px hsl(340 65% 55% / 0.15);
     --shadow-soft: 0 2px 10px -2px hsl(340 20% 50% / 0.08);
     --shadow-glow: 0 0 30px hsl(340 65% 55% / 0.2);
+    --drop-shadow-glow: drop-shadow(0 0 20px hsl(340 65% 55% / 0.4));
     
     /* Animations */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -81,6 +83,7 @@ All colors MUST be HSL.
 
     --primary: 340 65% 55%;
     --primary-foreground: 0 0% 100%;
+    --primary-glow: 340 65% 75%;
 
     --secondary: 270 45% 40%;
     --secondary-foreground: 340 10% 95%;
@@ -145,6 +148,10 @@ All colors MUST be HSL.
   
   .shadow-glow {
     box-shadow: var(--shadow-glow);
+  }
+  
+  .drop-shadow-glow {
+    filter: var(--drop-shadow-glow);
   }
   
   .transition-smooth {

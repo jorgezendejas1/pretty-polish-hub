@@ -26,6 +26,7 @@ export default {
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
+          glow: "hsl(var(--primary-glow))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -87,6 +88,16 @@ export default {
           },
           to: {
             height: "0",
+          },
+        },
+        "scale-in": {
+          "0%": {
+            transform: "scale(0.5)",
+            opacity: "0",
+          },
+          "100%": {
+            transform: "scale(1)",
+            opacity: "1",
           },
         },
       },
