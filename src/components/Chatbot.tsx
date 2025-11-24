@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MessageCircle, X, Send, Trash2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -64,6 +65,9 @@ export const Chatbot = () => {
   const [currentQuickReplies, setCurrentQuickReplies] = useState<string[]>(QUICK_REPLIES);
   const [showClearDialog, setShowClearDialog] = useState(false);
   const [userSentiment, setUserSentiment] = useState<'neutral' | 'frustrated' | 'happy'>('neutral');
+  const [sessionId] = useState(() => `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
+  const [sentimentCounts, setSentimentCounts] = useState({ frustrated: 0, neutral: 0, happy: 0 });
+  const [hasEscalated, setHasEscalated] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const autoOpenTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -127,6 +131,59 @@ export const Chatbot = () => {
     return 'neutral';
   };
 
+  const saveSentimentMetrics = async (sentiment: 'neutral' | 'frustrated' | 'happy', escalated: boolean = false) => {
+    try {
+      const newCounts = {
+        ...sentimentCounts,
+        [sentiment]: sentimentCounts[sentiment] + 1
+      };
+      setSentimentCounts(newCounts);
+
+      // Determinar sentimiento dominante
+      const dominantSentiment = Object.entries(newCounts).reduce((a, b) => 
+        newCounts[a[0] as keyof typeof newCounts] > newCounts[b[0] as keyof typeof newCounts] ? a : b
+      )[0] as 'frustrated' | 'neutral' | 'happy';
+
+      // Buscar si ya existe una métrica para esta sesión
+      const { data: existing } = await supabase
+        .from('chat_sentiment_metrics')
+        .select('id')
+        .eq('session_id', sessionId)
+        .maybeSingle();
+
+      const userEmail = (await supabase.auth.getUser()).data.user?.email || null;
+
+      if (existing) {
+        // Actualizar métrica existente
+        await supabase
+          .from('chat_sentiment_metrics')
+          .update({
+            message_count: newCounts.frustrated + newCounts.neutral + newCounts.happy,
+            sentiment_scores: newCounts,
+            dominant_sentiment: dominantSentiment,
+            escalated_to_human: escalated || hasEscalated,
+            user_email: userEmail,
+          })
+          .eq('id', existing.id);
+      } else {
+        // Crear nueva métrica
+        await supabase
+          .from('chat_sentiment_metrics')
+          .insert({
+            session_id: sessionId,
+            message_count: 1,
+            sentiment_scores: newCounts,
+            dominant_sentiment: sentiment,
+            escalated_to_human: escalated,
+            user_email: userEmail,
+          });
+      }
+    } catch (error) {
+      console.error('Error saving sentiment metrics:', error);
+      // No mostrar error al usuario, es métrica interna
+    }
+  };
+
   // Guardar mensajes en localStorage cuando cambien
   useEffect(() => {
     try {
@@ -184,6 +241,40 @@ export const Chatbot = () => {
     // Analizar sentimiento del mensaje
     const sentiment = analyzeSentiment(userMessage);
     setUserSentiment(sentiment);
+    
+    // Guardar métricas de sentimiento
+    await saveSentimentMetrics(sentiment);
+    
+    // Detectar frustración extrema (2+ mensajes frustrados consecutivos)
+    const recentMessages = messages.slice(-3);
+    const recentUserMessages = recentMessages.filter(m => m.role === 'user');
+    const consecutiveFrustrated = recentUserMessages.every(m => 
+      analyzeSentiment(m.content) === 'frustrated'
+    ) && sentiment === 'frustrated' && recentUserMessages.length >= 2;
+    
+    if (consecutiveFrustrated && !hasEscalated) {
+      setHasEscalated(true);
+      await saveSentimentMetrics(sentiment, true);
+      
+      // Agregar mensaje automático de escalación
+      const escalationMessage = {
+        role: 'assistant' as const,
+        content: `😔 Noto que estás experimentando dificultades y quiero asegurarme de que recibas la mejor atención posible.
+
+**¿Te gustaría hablar directamente con nuestro equipo?**
+
+Puedo conectarte de inmediato por:
+📱 [WhatsApp: +52 998 590 0050](https://wa.me/5219985900050?text=Vengo%20de%20PitayaNails.com%2C%20necesito%20ayuda%20urgente)
+📞 Teléfono: +52 998 590 0050
+📧 Email: pitayanailscancun@gmail.com
+
+¿Prefieres que continuemos por aquí o te conecto con un asesor humano?`
+      };
+      
+      setMessages([...messages, { role: 'user', content: userMessage }, escalationMessage]);
+      setIsLoading(false);
+      return;
+    }
     
     const newMessages = [...messages, { role: 'user' as const, content: userMessage }];
     setMessages(newMessages);
