@@ -4,7 +4,7 @@ export interface Service {
   description: string;
   duration: number; // in minutes
   price: number;
-  category: 'manicura' | 'pedicura' | 'nail-art' | 'esculturales' | 'tratamientos';
+  category: 'manicura' | 'pedicura' | 'nail-art' | 'esculturales' | 'tratamientos' | 'paquetes';
   imageUrl: string;
   isCustomizable?: boolean;
   customizationPrompt?: string;
