@@ -22,7 +22,11 @@ import { Badge } from '@/components/ui/badge';
 import { AdminStats } from '@/components/AdminStats';
 import { ReviewDialog } from '@/components/ReviewDialog';
 import { ExportReportButton } from '@/components/ExportReportButton';
+import { PortfolioUpload } from '@/components/PortfolioUpload';
+import { PortfolioApproval } from '@/components/PortfolioApproval';
+import { AnalyticsDashboard } from '@/components/AnalyticsDashboard';
 import { Star } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 // Componente helper para cargar imágenes con fallback
 const ImageWithFallback = ({ imagePath, alt }: { imagePath: string | null; alt: string }) => {
@@ -284,7 +288,16 @@ export default function Dashboard() {
 
         {isAdmin && <AdminStats />}
 
-        <Card className="shadow-elegant">
+        <Tabs defaultValue="bookings" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4">
+            <TabsTrigger value="bookings">Reservas</TabsTrigger>
+            {!isAdmin && <TabsTrigger value="portfolio">Subir Fotos</TabsTrigger>}
+            {isAdmin && <TabsTrigger value="portfolio-approval">Aprobar Fotos</TabsTrigger>}
+            {isAdmin && <TabsTrigger value="analytics">Analíticas</TabsTrigger>}
+          </TabsList>
+
+          <TabsContent value="bookings">
+            <Card className="shadow-elegant">
           <CardHeader>
             <CardTitle className="text-2xl font-bold">
               {isAdmin ? 'Panel de Administración - Todas las Reservas' : 'Mis Reservas'}
@@ -513,6 +526,26 @@ export default function Dashboard() {
             )}
           </CardContent>
         </Card>
+        </TabsContent>
+
+        {!isAdmin && (
+          <TabsContent value="portfolio">
+            <PortfolioUpload />
+          </TabsContent>
+        )}
+
+        {isAdmin && (
+          <TabsContent value="portfolio-approval">
+            <PortfolioApproval />
+          </TabsContent>
+        )}
+
+        {isAdmin && (
+          <TabsContent value="analytics">
+            <AnalyticsDashboard />
+          </TabsContent>
+        )}
+      </Tabs>
         
         {selectedBooking && (
           <ReviewDialog

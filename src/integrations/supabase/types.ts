@@ -74,6 +74,59 @@ export type Database = {
         }
         Relationships: []
       }
+      portfolio_submissions: {
+        Row: {
+          booking_id: string | null
+          client_email: string
+          client_name: string
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          booking_id?: string | null
+          client_email: string
+          client_name: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url: string
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          booking_id?: string | null
+          client_email?: string
+          client_name?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portfolio_submissions_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
