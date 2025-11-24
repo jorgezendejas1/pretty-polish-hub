@@ -74,6 +74,42 @@ export type Database = {
         }
         Relationships: []
       }
+      chat_sentiment_metrics: {
+        Row: {
+          created_at: string
+          dominant_sentiment: string
+          escalated_to_human: boolean
+          id: string
+          message_count: number
+          sentiment_scores: Json
+          session_id: string
+          updated_at: string
+          user_email: string | null
+        }
+        Insert: {
+          created_at?: string
+          dominant_sentiment: string
+          escalated_to_human?: boolean
+          id?: string
+          message_count?: number
+          sentiment_scores?: Json
+          session_id: string
+          updated_at?: string
+          user_email?: string | null
+        }
+        Update: {
+          created_at?: string
+          dominant_sentiment?: string
+          escalated_to_human?: boolean
+          id?: string
+          message_count?: number
+          sentiment_scores?: Json
+          session_id?: string
+          updated_at?: string
+          user_email?: string | null
+        }
+        Relationships: []
+      }
       loyalty_rewards: {
         Row: {
           created_at: string
