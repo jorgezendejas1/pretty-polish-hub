@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Gift, Star, Award, Sparkles } from 'lucide-react';
+import { Gift, Star, Award, Sparkles, PartyPopper } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import confetti from 'canvas-confetti';
 
 interface LoyaltyData {
   visits_count: number;
@@ -15,10 +16,76 @@ interface LoyaltyData {
 export const LoyaltyCard = () => {
   const [loyaltyData, setLoyaltyData] = useState<LoyaltyData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showCelebration, setShowCelebration] = useState(false);
+  const previousVisitsRef = useRef<number>(0);
+  const celebrationTriggeredRef = useRef(false);
 
   useEffect(() => {
     loadLoyaltyData();
   }, []);
+
+  useEffect(() => {
+    if (loyaltyData && loyaltyData.visits_count >= 7 && !celebrationTriggeredRef.current) {
+      // Solo activar celebración si acabamos de alcanzar 7+ visitas
+      if (previousVisitsRef.current < 7) {
+        triggerCelebration();
+        celebrationTriggeredRef.current = true;
+      }
+    }
+    if (loyaltyData) {
+      previousVisitsRef.current = loyaltyData.visits_count;
+    }
+  }, [loyaltyData]);
+
+  const triggerCelebration = () => {
+    setShowCelebration(true);
+    
+    // Confetti explosion inicial
+    const duration = 3000;
+    const animationEnd = Date.now() + duration;
+    const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 };
+
+    function randomInRange(min: number, max: number) {
+      return Math.random() * (max - min) + min;
+    }
+
+    const interval: any = setInterval(function() {
+      const timeLeft = animationEnd - Date.now();
+
+      if (timeLeft <= 0) {
+        clearInterval(interval);
+        return;
+      }
+
+      const particleCount = 50 * (timeLeft / duration);
+      
+      // Confetti desde ambos lados
+      confetti({
+        ...defaults,
+        particleCount,
+        origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
+        colors: ['#FF69B4', '#FFD700', '#FF1493', '#FF6B9D', '#FFA500']
+      });
+      confetti({
+        ...defaults,
+        particleCount,
+        origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
+        colors: ['#FF69B4', '#FFD700', '#FF1493', '#FF6B9D', '#FFA500']
+      });
+    }, 250);
+
+    // Toast especial de celebración
+    toast({
+      title: '🎉 ¡FELICIDADES! 🎉',
+      description: '¡Has alcanzado tu recompensa! Tu próxima visita es TOTALMENTE GRATIS 💅✨',
+      duration: 6000,
+    });
+
+    // Ocultar animación después de 3 segundos
+    setTimeout(() => {
+      setShowCelebration(false);
+    }, 3000);
+  };
 
   const loadLoyaltyData = async () => {
     try {
@@ -88,14 +155,31 @@ export const LoyaltyCard = () => {
   const isEligibleForReward = loyaltyData.visits_count >= 7;
 
   return (
-    <Card className="shadow-elegant relative overflow-hidden">
+    <Card className={`shadow-elegant relative overflow-hidden transition-all duration-500 ${
+      showCelebration ? 'ring-4 ring-primary ring-offset-4 animate-pulse' : ''
+    }`}>
       {/* Background gradient effect */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary-glow/5"></div>
+      <div className={`absolute inset-0 transition-all duration-500 ${
+        showCelebration 
+          ? 'bg-gradient-to-br from-primary/20 via-primary-glow/20 to-primary/20 animate-[pulse_1s_ease-in-out_infinite]' 
+          : 'bg-gradient-to-br from-primary/5 via-transparent to-primary-glow/5'
+      }`}></div>
+      
+      {/* Celebration overlay */}
+      {showCelebration && (
+        <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
+          <div className="animate-[scale-in_0.5s_ease-out]">
+            <PartyPopper className="h-24 w-24 text-primary drop-shadow-glow animate-[spin_2s_ease-in-out]" />
+          </div>
+        </div>
+      )}
       
       <CardHeader className="relative">
         <div className="flex items-center justify-between">
-          <CardTitle className="font-display text-xl flex items-center gap-2">
-            <Gift className="h-5 w-5 text-primary" />
+          <CardTitle className={`font-display text-xl flex items-center gap-2 transition-all duration-300 ${
+            showCelebration ? 'scale-110' : ''
+          }`}>
+            <Gift className={`h-5 w-5 text-primary ${showCelebration ? 'animate-bounce' : ''}`} />
             Programa de Lealtad
           </CardTitle>
           {loyaltyData.total_rewards_claimed > 0 && (
@@ -151,10 +235,14 @@ export const LoyaltyCard = () => {
         {/* Status Message */}
         <div className="space-y-2">
           {isEligibleForReward ? (
-            <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 space-y-2">
+            <div className={`bg-primary/10 border border-primary/20 rounded-lg p-4 space-y-2 transition-all duration-300 ${
+              showCelebration ? 'scale-105 shadow-glow' : ''
+            }`}>
               <div className="flex items-center gap-2 text-primary font-semibold">
-                <Sparkles className="h-5 w-5 animate-pulse" />
-                <span>¡Tu próxima visita es GRATIS!</span>
+                <Sparkles className={`h-5 w-5 ${showCelebration ? 'animate-spin' : 'animate-pulse'}`} />
+                <span className={showCelebration ? 'animate-bounce' : ''}>
+                  ¡Tu próxima visita es GRATIS!
+                </span>
               </div>
               <p className="text-sm text-muted-foreground">
                 Reserva tu siguiente cita y el total será $0. ¡Disfruta tu recompensa!
