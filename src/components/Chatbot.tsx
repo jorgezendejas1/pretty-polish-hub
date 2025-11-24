@@ -17,6 +17,13 @@ const QUICK_REPLIES = [
   'Ver precios',
 ];
 
+const CONTEXTUAL_REPLIES = {
+  greeting: ['¿Qué servicios ofrecen?', 'Quiero agendar una cita', 'Ver portafolio'],
+  services: ['Agendar una cita', 'Ver precios', '¿Cuál es su ubicación?'],
+  booking: ['Ver disponibilidad', 'Cambiar fecha', 'Contactar por teléfono'],
+  info: ['Ver más servicios', 'Conocer al equipo', 'Ver trabajos realizados'],
+};
+
 export const Chatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
@@ -28,7 +35,7 @@ export const Chatbot = () => {
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [showQuickReplies, setShowQuickReplies] = useState(true);
+  const [currentQuickReplies, setCurrentQuickReplies] = useState<string[]>(QUICK_REPLIES);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const autoOpenTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -81,7 +88,6 @@ export const Chatbot = () => {
     if (!userMessage || isLoading) return;
 
     setInput('');
-    setShowQuickReplies(false);
     
     const newMessages = [...messages, { role: 'user' as const, content: userMessage }];
     setMessages(newMessages);
@@ -160,6 +166,18 @@ export const Chatbot = () => {
               assistantMessage += content;
               setMessages([...newMessages, { role: 'assistant', content: assistantMessage }]);
             }
+            
+            // Detectar contexto y actualizar sugerencias
+            if (content && assistantMessage.length > 20) {
+              const lowerContent = assistantMessage.toLowerCase();
+              if (lowerContent.includes('servicio') || lowerContent.includes('precio')) {
+                setCurrentQuickReplies(CONTEXTUAL_REPLIES.services);
+              } else if (lowerContent.includes('cita') || lowerContent.includes('reserva') || lowerContent.includes('agendar')) {
+                setCurrentQuickReplies(CONTEXTUAL_REPLIES.booking);
+              } else if (lowerContent.includes('equipo') || lowerContent.includes('portafolio') || lowerContent.includes('certificacion')) {
+                setCurrentQuickReplies(CONTEXTUAL_REPLIES.info);
+              }
+            }
           } catch {
             // Ignorar JSON incompleto
           }
@@ -182,7 +200,6 @@ export const Chatbot = () => {
   };
 
   const handleQuickReply = (reply: string) => {
-    setShowQuickReplies(false);
     handleSend(reply);
   };
 
@@ -246,16 +263,16 @@ export const Chatbot = () => {
                 </div>
               </div>
             )}
-            {showQuickReplies && messages.length === 1 && (
+            {!isLoading && messages.length > 0 && messages[messages.length - 1]?.role === 'assistant' && (
               <div className="flex flex-col gap-2 mt-4">
-                <p className="text-xs text-muted-foreground mb-1">Respuestas rápidas:</p>
-                {QUICK_REPLIES.map((reply, index) => (
+                <p className="text-xs text-muted-foreground mb-1">Sugerencias:</p>
+                {currentQuickReplies.map((reply, index) => (
                   <Button
                     key={index}
                     variant="outline"
                     size="sm"
                     onClick={() => handleQuickReply(reply)}
-                    className="text-left justify-start h-auto py-2 px-3 text-sm"
+                    className="text-left justify-start h-auto py-2 px-3 text-sm hover:bg-primary/10 transition-colors"
                   >
                     {reply}
                   </Button>
