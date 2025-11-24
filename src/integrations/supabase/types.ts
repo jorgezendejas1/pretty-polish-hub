@@ -74,6 +74,39 @@ export type Database = {
         }
         Relationships: []
       }
+      loyalty_rewards: {
+        Row: {
+          created_at: string
+          id: string
+          last_visit_date: string | null
+          next_reward_at: number
+          total_rewards_claimed: number
+          updated_at: string
+          user_id: string
+          visits_count: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_visit_date?: string | null
+          next_reward_at?: number
+          total_rewards_claimed?: number
+          updated_at?: string
+          user_id: string
+          visits_count?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_visit_date?: string | null
+          next_reward_at?: number
+          total_rewards_claimed?: number
+          updated_at?: string
+          user_id?: string
+          visits_count?: number
+        }
+        Relationships: []
+      }
       portfolio_submissions: {
         Row: {
           booking_id: string | null
