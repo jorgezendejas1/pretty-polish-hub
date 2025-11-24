@@ -76,10 +76,10 @@ export const Chatbot = () => {
     };
   }, [hasInteracted, isOpen]);
 
-  const handleSend = async () => {
-    if (!input.trim() || isLoading) return;
+  const handleSend = async (messageToSend?: string) => {
+    const userMessage = messageToSend || input.trim();
+    if (!userMessage || isLoading) return;
 
-    const userMessage = input.trim();
     setInput('');
     setShowQuickReplies(false);
     
@@ -182,9 +182,8 @@ export const Chatbot = () => {
   };
 
   const handleQuickReply = (reply: string) => {
-    setInput(reply);
     setShowQuickReplies(false);
-    setTimeout(() => handleSend(), 100);
+    handleSend(reply);
   };
 
   return (
@@ -280,7 +279,7 @@ export const Chatbot = () => {
                 disabled={isLoading}
               />
               <Button
-                onClick={handleSend}
+                onClick={() => handleSend()}
                 disabled={!input.trim() || isLoading}
                 size="icon"
                 className="gradient-primary text-white"
