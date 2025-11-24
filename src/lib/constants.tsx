@@ -15,6 +15,16 @@ import port009 from '@/assets/portfolio/port-009.jpg';
 import port010 from '@/assets/portfolio/port-010.jpg';
 import port011 from '@/assets/portfolio/port-011.jpg';
 import port012 from '@/assets/portfolio/port-012.jpg';
+import port013 from '@/assets/portfolio/port-013.jpg';
+import port014 from '@/assets/portfolio/port-014.jpg';
+import port015 from '@/assets/portfolio/port-015.jpg';
+import port016 from '@/assets/portfolio/port-016.jpg';
+import port017 from '@/assets/portfolio/port-017.jpg';
+import port018 from '@/assets/portfolio/port-018.jpg';
+import port019 from '@/assets/portfolio/port-019.jpg';
+import port020 from '@/assets/portfolio/port-020.jpg';
+import port021 from '@/assets/portfolio/port-021.jpg';
+import port022 from '@/assets/portfolio/port-022.jpg';
 
 export const SERVICES: Service[] = [
   {
@@ -139,52 +149,118 @@ export const TESTIMONIALS: Testimonial[] = [
 
 export const PORTFOLIO_IMAGES: PortfolioImage[] = [
   {
-    id: 'port-1',
-    src: gallery1,
-    alt: 'Diseño de uñas con flores',
+    id: 'port-001',
+    src: port001,
+    alt: 'Diseño de uñas elegante',
     category: 'nail-art',
   },
   {
-    id: 'port-2',
-    src: gallery2,
-    alt: 'Manicura francesa elegante',
+    id: 'port-002',
+    src: port002,
+    alt: 'Manicura profesional',
     category: 'manicura',
   },
   {
-    id: 'port-3',
-    src: gallery3,
-    alt: 'Uñas acrílicas con efecto mármol',
+    id: 'port-003',
+    src: port003,
+    alt: 'Uñas acrílicas perfectas',
     category: 'esculturales',
   },
   {
-    id: 'port-4',
-    src: gallery4,
-    alt: 'Diseño geométrico moderno',
+    id: 'port-004',
+    src: port004,
+    alt: 'Diseño creativo',
     category: 'nail-art',
   },
   {
-    id: 'port-5',
-    src: gallery1,
-    alt: 'Pedicura con acabado brillante',
-    category: 'pedicura',
-  },
-  {
-    id: 'port-6',
-    src: gallery2,
-    alt: 'Uñas con glitter y cristales',
-    category: 'nail-art',
-  },
-  {
-    id: 'port-7',
-    src: gallery3,
-    alt: 'Manicura nude natural',
+    id: 'port-005',
+    src: port005,
+    alt: 'Acabado brillante',
     category: 'manicura',
   },
   {
-    id: 'port-8',
-    src: gallery4,
-    alt: 'Extensión con polygel',
+    id: 'port-006',
+    src: port006,
+    alt: 'Uñas con decoración',
+    category: 'nail-art',
+  },
+  {
+    id: 'port-007',
+    src: port007,
+    alt: 'Manicura nude',
+    category: 'manicura',
+  },
+  {
+    id: 'port-008',
+    src: port008,
+    alt: 'Extensión profesional',
     category: 'esculturales',
+  },
+  {
+    id: 'port-009',
+    src: port009,
+    alt: 'Diseño artístico',
+    category: 'nail-art',
+  },
+  {
+    id: 'port-010',
+    src: port010,
+    alt: 'Trabajo detallado',
+    category: 'nail-art',
+  },
+  {
+    id: 'port-011',
+    src: port011,
+    alt: 'Manicura elegante',
+    category: 'manicura',
+  },
+  {
+    id: 'port-012',
+    src: port012,
+    alt: 'Diseño personalizado',
+    category: 'nail-art',
+  },
+  {
+    id: 'port-013',
+    src: port013,
+    alt: 'Uñas con mariposa holográfica y glitter',
+    category: 'nail-art',
+  },
+  {
+    id: 'port-014',
+    src: port014,
+    alt: 'Diseño con mariposa iridiscente',
+    category: 'nail-art',
+  },
+  {
+    id: 'port-015',
+    src: port015,
+    alt: 'French tips con decoración de cristales',
+    category: 'nail-art',
+  },
+  {
+    id: 'port-016',
+    src: port016,
+    alt: 'Manicura francesa con glitter naranja',
+    category: 'nail-art',
+  },
+  {
+    id: 'port-017',
+    src: port017,
+    alt: 'Diseño con detalles dorados y glitter',
+    category: 'nail-art',
+  },
+  {
+    id: 'port-018',
+    src: port018,
+    alt: 'Manicura natural con french tips',
+    category: 'manicura',
+  },
+  {
+    id: 'port-019',
+    src: port019,
+    alt: 'Uñas con glitter plateado en degradado',
+    category: 'manicura',
   },
 ];
 
