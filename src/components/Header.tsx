@@ -4,6 +4,7 @@ import { Button } from './ui/button';
 import { Menu, X, Calendar, Instagram, Facebook, Phone } from 'lucide-react';
 import { SALON_INFO } from '@/lib/constants';
 import { AuthButton } from '@/components/AuthButton';
+import { MegaMenu } from '@/ui-kit/MegaMenu';
 
 export const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -67,19 +68,24 @@ export const Header = () => {
               </span>
             </Link>
 
-            {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center space-x-8">
-              {navLinks.slice(0, 6).map((link) => (
-                <Link
-                  key={link.path}
-                  to={link.path}
-                  className="text-sm font-medium text-foreground hover:text-primary transition-smooth relative group"
-                >
-                  {link.name}
-                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
-                </Link>
-              ))}
-            </nav>
+            {/* Desktop Navigation with MegaMenu */}
+            <div className="hidden lg:flex items-center space-x-6">
+              <MegaMenu />
+              <Link
+                to="/sobre-nosotros"
+                className="text-sm font-medium text-foreground hover:text-primary transition-smooth relative group"
+              >
+                Nosotros
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
+              </Link>
+              <Link
+                to="/contacto"
+                className="text-sm font-medium text-foreground hover:text-primary transition-smooth relative group"
+              >
+                Contacto
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
+              </Link>
+            </div>
 
             {/* Desktop Actions */}
             <div className="hidden lg:flex items-center space-x-4">
