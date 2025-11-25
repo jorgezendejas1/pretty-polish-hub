@@ -29,6 +29,9 @@ import { SentimentMetrics } from '@/components/SentimentMetrics';
 import { SecurityMonitor } from '@/components/SecurityMonitor';
 import { LoyaltyCard } from '@/components/LoyaltyCard';
 import { BookingManager } from '@/components/BookingManager';
+import { AdminCalendar } from '@/components/AdminCalendar';
+import { ServicesCRUD } from '@/components/ServicesCRUD';
+import { AdminNotifications } from '@/components/AdminNotifications';
 import { Star } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
@@ -316,6 +319,7 @@ export default function Dashboard() {
                   <Shield className="h-3 w-3 mr-1" />
                   Administrador
                 </Badge>
+                <AdminNotifications />
                 <ExportReportButton />
               </>
             )}
@@ -327,9 +331,11 @@ export default function Dashboard() {
         {!isAdmin && <LoyaltyCard />}
 
         <Tabs defaultValue="bookings" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-6">
+          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-8">
             <TabsTrigger value="bookings">Reservas</TabsTrigger>
             {!isAdmin && <TabsTrigger value="portfolio">Subir Fotos</TabsTrigger>}
+            {isAdmin && <TabsTrigger value="calendar">Calendario</TabsTrigger>}
+            {isAdmin && <TabsTrigger value="services">Servicios</TabsTrigger>}
             {isAdmin && <TabsTrigger value="portfolio-approval">Aprobar Fotos</TabsTrigger>}
             {isAdmin && <TabsTrigger value="analytics">Analíticas</TabsTrigger>}
             {isAdmin && <TabsTrigger value="sentiment">Satisfacción</TabsTrigger>}
@@ -614,6 +620,18 @@ export default function Dashboard() {
         {!isAdmin && (
           <TabsContent value="portfolio">
             <PortfolioUpload />
+          </TabsContent>
+        )}
+
+        {isAdmin && (
+          <TabsContent value="calendar">
+            <AdminCalendar />
+          </TabsContent>
+        )}
+
+        {isAdmin && (
+          <TabsContent value="services">
+            <ServicesCRUD />
           </TabsContent>
         )}
 
