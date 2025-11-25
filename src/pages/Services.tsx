@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { SERVICES } from '@/lib/constants';
+import { SERVICES, TEAM_MEMBERS } from '@/lib/constants';
 import { Service } from '@/types';
 import { ServiceCard } from '@/components/ServiceCard';
 import { BookingFlow } from '@/components/BookingFlow';
@@ -8,7 +8,10 @@ import { LoyaltyBanner } from '@/components/LoyaltyBanner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Grid, List, Calendar, DollarSign, Clock } from 'lucide-react';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Search, Grid, List, Calendar, DollarSign, Clock, Check } from 'lucide-react';
+import { ScrollReveal } from '@/components/ScrollReveal';
 
 const Services = () => {
   const [searchParams] = useSearchParams();
@@ -16,9 +19,11 @@ const Services = () => {
   const [selectedServices, setSelectedServices] = useState<Service[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [professionalFilter, setProfessionalFilter] = useState<string>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [priceRange, setPriceRange] = useState<string>('all');
   const [showBookingFlow, setShowBookingFlow] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   useEffect(() => {
     const serviceId = searchParams.get('service');
@@ -30,17 +35,28 @@ const Services = () => {
     }
   }, [searchParams]);
 
-  const filteredServices = SERVICES.filter((service) => {
-    const matchesSearch = service.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      service.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = categoryFilter === 'all' || service.category === categoryFilter;
-    const matchesPrice = priceRange === 'all' ||
-      (priceRange === 'low' && service.price < 400) ||
-      (priceRange === 'medium' && service.price >= 400 && service.price < 700) ||
-      (priceRange === 'high' && service.price >= 700);
-    
-    return matchesSearch && matchesCategory && matchesPrice;
-  });
+  const filteredServices = useMemo(() => {
+    return SERVICES.filter((service) => {
+      const matchesSearch = service.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        service.description.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesCategory = categoryFilter === 'all' || service.category === categoryFilter;
+      const matchesProfessional = professionalFilter === 'all' || true; // All professionals can do all services
+      const matchesPrice = priceRange === 'all' ||
+        (priceRange === 'low' && service.price < 400) ||
+        (priceRange === 'medium' && service.price >= 400 && service.price < 700) ||
+        (priceRange === 'high' && service.price >= 700);
+      
+      return matchesSearch && matchesCategory && matchesProfessional && matchesPrice;
+    });
+  }, [searchTerm, categoryFilter, professionalFilter, priceRange]);
+
+  // Autosuggest services based on search
+  const suggestedServices = useMemo(() => {
+    if (!searchTerm || searchTerm.length < 2) return [];
+    return SERVICES.filter((service) =>
+      service.name.toLowerCase().includes(searchTerm.toLowerCase())
+    ).slice(0, 5);
+  }, [searchTerm]);
 
   const toggleServiceSelection = (serviceId: string) => {
     const service = SERVICES.find((s) => s.id === serviceId);
@@ -93,13 +109,54 @@ const Services = () => {
         <div className="mb-8 space-y-4">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Buscar servicios..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
+              <Popover open={showSuggestions && suggestedServices.length > 0} onOpenChange={setShowSuggestions}>
+                <PopoverTrigger asChild>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
+                    <Input
+                      placeholder="Buscar servicios... (autocomplete)"
+                      value={searchTerm}
+                      onChange={(e) => {
+                        setSearchTerm(e.target.value);
+                        setShowSuggestions(true);
+                      }}
+                      onFocus={() => setShowSuggestions(true)}
+                      className="pl-10"
+                    />
+                  </div>
+                </PopoverTrigger>
+                <PopoverContent className="w-[400px] p-0" align="start">
+                  <Command>
+                    <CommandList>
+                      <CommandEmpty>No se encontraron servicios.</CommandEmpty>
+                      <CommandGroup heading="Sugerencias">
+                        {suggestedServices.map((service) => (
+                          <CommandItem
+                            key={service.id}
+                            value={service.name}
+                            onSelect={() => {
+                              setSearchTerm(service.name);
+                              setShowSuggestions(false);
+                              toggleServiceSelection(service.id);
+                            }}
+                            className="cursor-pointer"
+                          >
+                            <div className="flex items-center justify-between w-full">
+                              <span>{service.name}</span>
+                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <Clock className="h-3 w-3" />
+                                <span>{service.duration}min</span>
+                                <DollarSign className="h-3 w-3" />
+                                <span>${service.price}</span>
+                              </div>
+                            </div>
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </div>
             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
               <SelectTrigger className="w-full md:w-48">
@@ -112,6 +169,19 @@ const Services = () => {
                 <SelectItem value="nail-art">Nail Art</SelectItem>
                 <SelectItem value="esculturales">Esculturales</SelectItem>
                 <SelectItem value="tratamientos">Tratamientos</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={professionalFilter} onValueChange={setProfessionalFilter}>
+              <SelectTrigger className="w-full md:w-48">
+                <SelectValue placeholder="Profesional" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos los profesionales</SelectItem>
+                {TEAM_MEMBERS.map((member) => (
+                  <SelectItem key={member.id} value={member.id}>
+                    {member.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
             <Select value={priceRange} onValueChange={setPriceRange}>
@@ -152,14 +222,15 @@ const Services = () => {
               : 'space-y-4'
           }
         >
-          {filteredServices.map((service) => (
-            <ServiceCard
-              key={service.id}
-              service={service}
-              onBook={startBooking}
-              isSelected={!!selectedServices.find((s) => s.id === service.id)}
-              onToggleSelect={toggleServiceSelection}
-            />
+          {filteredServices.map((service, index) => (
+            <ScrollReveal key={service.id} delay={index * 0.1} direction="up">
+              <ServiceCard
+                service={service}
+                onBook={startBooking}
+                isSelected={!!selectedServices.find((s) => s.id === service.id)}
+                onToggleSelect={toggleServiceSelection}
+              />
+            </ScrollReveal>
           ))}
         </div>
 
@@ -196,9 +267,9 @@ const Services = () => {
               <Button
                 onClick={startBooking}
                 size="lg"
-                className="gradient-primary text-white w-full md:w-auto"
+                className="gradient-primary text-white w-full md:w-auto relative overflow-hidden hover-scale"
               >
-                Reservar Cita
+                <span className="relative z-10">Reservar Cita</span>
               </Button>
             </div>
           </div>
