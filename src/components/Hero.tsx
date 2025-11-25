@@ -25,7 +25,7 @@ export const Hero = () => {
       {/* Content */}
       <div className="container mx-auto px-4 z-10 text-center animate-fade-in">
         <h1 className="text-5xl md:text-7xl lg:text-8xl font-display font-bold mb-6 text-white">
-          Belleza
+          Belleza en Cada Detalle
         </h1>
         
         <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-2xl mx-auto">
