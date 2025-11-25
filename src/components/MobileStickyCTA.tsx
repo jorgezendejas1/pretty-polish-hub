@@ -22,7 +22,7 @@ export const MobileStickyCTA = () => {
   }, []);
 
   // Hide on services and dashboard pages
-  const hiddenRoutes = ['/services', '/dashboard', '/auth', '/booking'];
+  const hiddenRoutes = ['/servicios', '/dashboard', '/auth', '/booking'];
   const shouldShow = !hiddenRoutes.some(route => location.pathname.includes(route)) && isVisible && isMobile;
 
   if (!shouldShow) return null;
@@ -47,7 +47,7 @@ export const MobileStickyCTA = () => {
               </p>
             </div>
             <Button
-              onClick={() => navigate('/services')}
+              onClick={() => navigate('/servicios')}
               size="lg"
               className="bg-white text-primary hover:bg-white/90 shadow-lg"
             >
