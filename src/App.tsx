@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { HelmetProvider } from "react-helmet-async";
 import { Layout } from "./components/Layout";
 import { Chatbot } from "@/components/Chatbot";
 import Index from "./pages/Index";
@@ -22,32 +23,34 @@ import Install from "./pages/Install";
 const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/auth" element={<Auth />} />
-          <Route element={<Layout />}>
-            <Route path="/" element={<Index />} />
-            <Route path="/servicios" element={<Services />} />
-            <Route path="/portafolio" element={<Portfolio />} />
-            <Route path="/transformaciones" element={<BeforeAfter />} />
-            <Route path="/equipo" element={<Team />} />
-            <Route path="/sobre-nosotros" element={<About />} />
-            <Route path="/certificaciones" element={<Diplomas />} />
-            <Route path="/editor" element={<ImageEditor />} />
-            <Route path="/contacto" element={<Contact />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/instalar" element={<Install />} />
-          </Route>
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        <Chatbot />
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+  <HelmetProvider>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/auth" element={<Auth />} />
+            <Route element={<Layout />}>
+              <Route path="/" element={<Index />} />
+              <Route path="/servicios" element={<Services />} />
+              <Route path="/portafolio" element={<Portfolio />} />
+              <Route path="/transformaciones" element={<BeforeAfter />} />
+              <Route path="/equipo" element={<Team />} />
+              <Route path="/sobre-nosotros" element={<About />} />
+              <Route path="/certificaciones" element={<Diplomas />} />
+              <Route path="/editor" element={<ImageEditor />} />
+              <Route path="/contacto" element={<Contact />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/instalar" element={<Install />} />
+            </Route>
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          <Chatbot />
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </HelmetProvider>
 );
 
 export default App;

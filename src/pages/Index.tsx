@@ -2,17 +2,33 @@ import { Hero } from "@/components/Hero";
 import { Services } from "@/components/Services";
 import { Gallery } from "@/components/Gallery";
 import { VisitUs } from "@/components/VisitUs";
+import { SEO } from "@/components/SEO";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { TESTIMONIALS } from "@/lib/constants";
 import { Wand2, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { getLocalBusinessSchema, getOrganizationSchema } from "@/lib/jsonld";
 
 const Index = () => {
   const navigate = useNavigate();
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      getLocalBusinessSchema(),
+      getOrganizationSchema(),
+    ],
+  };
+
   return (
     <div className="min-h-screen">
+      <SEO
+        title="Pitaya Nails - Salón de Uñas Premium en Cancún"
+        description="Studio de uñas profesional especializado en manicura, pedicura, nail art y diseños exclusivos en Cancún. Reserva tu cita hoy. ✨"
+        url="https://pitayanails.com"
+        jsonLd={jsonLd}
+      />
       <Hero />
       <Services />
       

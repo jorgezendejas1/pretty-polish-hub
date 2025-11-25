@@ -5,6 +5,7 @@ import { Service } from '@/types';
 import { ServiceCard } from '@/components/ServiceCard';
 import { BookingFlow } from '@/components/BookingFlow';
 import { LoyaltyBanner } from '@/components/LoyaltyBanner';
+import { SEO } from '@/components/SEO';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -12,6 +13,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Search, Grid, List, Calendar, DollarSign, Clock, Check } from 'lucide-react';
 import { ScrollReveal } from '@/components/ScrollReveal';
+import { getBookingSchema, getBreadcrumbSchema } from '@/lib/jsonld';
 
 const Services = () => {
   const [searchParams] = useSearchParams();
@@ -24,6 +26,19 @@ const Services = () => {
   const [priceRange, setPriceRange] = useState<string>('all');
   const [showBookingFlow, setShowBookingFlow] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
+
+  const breadcrumbSchema = getBreadcrumbSchema([
+    { name: 'Inicio', url: 'https://pitayanails.com' },
+    { name: 'Servicios', url: 'https://pitayanails.com/servicios' },
+  ]);
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      getBookingSchema(),
+      breadcrumbSchema,
+    ],
+  };
 
   useEffect(() => {
     const serviceId = searchParams.get('service');
@@ -90,6 +105,12 @@ const Services = () => {
 
   return (
     <div className="min-h-screen pt-24 pb-12">
+      <SEO
+        title="Servicios de Manicura y Pedicura Premium"
+        description="Descubre nuestros servicios de manicura, pedicura, nail art y diseños exclusivos. Reserva tu cita online en Pitaya Nails Cancún. Desde $250 MXN."
+        url="https://pitayanails.com/servicios"
+        jsonLd={jsonLd}
+      />
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-6xl font-display font-bold mb-4">
