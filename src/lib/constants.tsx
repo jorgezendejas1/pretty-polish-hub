@@ -377,13 +377,13 @@ export const SALON_INFO = {
   social: {
     instagram: 'https://www.instagram.com/nailstation_cun',
     facebook: 'https://www.facebook.com/profile.php?id=61569280002188',
-    whatsapp: 'https://wa.me/5219985900050?text=Vengo%20de%20PitayaNails.com%2C%20quiero%20mas%20informacion',
+    whatsapp: 'https://wa.me/529985900050?text=Vengo%20de%20PitayaNails.com%2C%20quiero%20mas%20informacion',
   },
 };
 
 export const ABOUT_TEXT = `
 Pitaya Nails es más que un salón de uñas, es un refugio de belleza y bienestar en el corazón de Cancún. 
-Fundado en 2020 por Lily Rodríguez, nuestro studio se ha convertido en el destino preferido para quienes 
+Fundado en 2020 por Lily Montaño, nuestro studio se ha convertido en el destino preferido para quienes 
 buscan excelencia en el cuidado de sus uñas.
 
 Nos enorgullecemos de ofrecer servicios de la más alta calidad utilizando productos premium y técnicas 

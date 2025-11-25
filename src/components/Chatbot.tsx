@@ -264,7 +264,7 @@ export const Chatbot = () => {
 **¿Te gustaría hablar directamente con nuestro equipo?**
 
 Puedo conectarte de inmediato por:
-📱 [WhatsApp: +52 998 590 0050](https://wa.me/5219985900050?text=Vengo%20de%20PitayaNails.com%2C%20necesito%20ayuda%20urgente)
+📱 [WhatsApp: +52 998 590 0050](https://wa.me/529985900050?text=Vengo%20de%20PitayaNails.com%2C%20necesito%20ayuda%20urgente)
 📞 Teléfono: +52 998 590 0050
 📧 Email: pitayanailscancun@gmail.com
 
