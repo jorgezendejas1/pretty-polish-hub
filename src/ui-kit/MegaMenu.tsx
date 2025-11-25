@@ -18,8 +18,8 @@ const menuItems = [
     title: 'Portafolio',
     icon: Image,
     items: [
-      { name: 'Galería', href: '/portfolio', description: 'Nuestros mejores trabajos' },
-      { name: 'Antes y Después', href: '/before-after', description: 'Transformaciones increíbles' },
+      { name: 'Galería', href: '/portafolio', description: 'Nuestros mejores trabajos' },
+      { name: 'Antes y Después', href: '/transformaciones', description: 'Transformaciones increíbles' },
     ],
   },
   {
