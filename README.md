@@ -101,6 +101,24 @@ El proyecto estará disponible en `http://localhost:5173`
 
 ## 🌐 Deploy a Producción
 
+### 🎯 Prioridad: Mobile-First, Velocidad y Conversiones
+
+**Pitaya Nails está optimizado para móvil primero:**
+- 70% de reservas vienen de dispositivos móviles
+- Sticky CTA siempre visible en mobile
+- Flujo de reserva en 4 pasos simplificados
+- WhatsApp button flotante para contacto inmediato
+- PWA instalable desde el navegador
+- Lighthouse Performance ≥90 en mobile
+
+**Optimizaciones de Conversión:**
+- Chatbot "Pita" proactivo después de 15 segundos
+- Quick replies para acelerar interacción
+- Programa de lealtad visible (8va visita gratis)
+- Portfolio categorizado para inspiración
+- Notificaciones automáticas reduce no-shows
+- Booking flow sin requerir login
+
 ### Opción 1: Deploy Automático con Lovable (Recomendado)
 
 1. Abre tu proyecto en [Lovable](https://lovable.dev/projects/0a94cf08-541c-4748-bddb-3bd5086646f1)
@@ -230,11 +248,150 @@ Ya configurado con dominio verificado. Para cambiar configuración:
 
 ### WhatsApp Business API
 
-Número configurado: `+52 998 590 0050`
+**Configuración Actual (Básica):**
+- Número: `+52 998 590 0050`
+- Botón flotante con mensaje pre-llenado
+- Link directo a WhatsApp Web/App
 
-Para activar notificaciones WhatsApp completas (requiere WhatsApp Business API aprobado):
-- Configura `WHATSAPP_ACCESS_TOKEN` en Lovable Cloud → Secrets
-- Edge function: `supabase/functions/send-whatsapp-notification/index.ts`
+**Para Activar Notificaciones Automáticas Completas:**
+
+Las notificaciones automáticas por WhatsApp requieren WhatsApp Business API (diferente de WhatsApp Business App).
+
+#### Paso 1: Crear Cuenta de WhatsApp Business API
+
+1. Ve a [Meta for Developers](https://developers.facebook.com/)
+2. Crea una App de tipo "Business"
+3. Agrega el producto "WhatsApp"
+4. Completa el Business Verification (verificación de negocio)
+   - Requiere documentos oficiales
+   - Proceso toma 1-3 días hábiles
+
+#### Paso 2: Obtener Credenciales
+
+Después de la aprobación:
+1. Ve a WhatsApp → Getting Started
+2. Copia el `Phone Number ID`
+3. Genera un `Access Token` permanente
+   - **Importante**: Usa System User Token (no Page Token)
+   - Permisos requeridos: `whatsapp_business_messaging`, `whatsapp_business_management`
+
+#### Paso 3: Configurar en Lovable Cloud
+
+```bash
+# Estos secrets ya están configurados, actualízalos si cambias
+WHATSAPP_PHONE_NUMBER_ID=tu_phone_number_id_aqui
+WHATSAPP_ACCESS_TOKEN=tu_access_token_permanente_aqui
+```
+
+1. Abre tu proyecto en Lovable
+2. Ve a Cloud → Secrets
+3. Actualiza los valores de `WHATSAPP_PHONE_NUMBER_ID` y `WHATSAPP_ACCESS_TOKEN`
+
+#### Paso 4: Aprobar Template de Mensajes
+
+WhatsApp requiere pre-aprobar templates de mensajes:
+
+1. Ve a Meta Business Suite → WhatsApp Manager
+2. Crea templates para:
+   - **Confirmación de reserva**
+   - **Recordatorio 24 horas antes**
+   - **Solicitud de reseña**
+
+**Ejemplo de Template (Confirmación):**
+```
+Nombre: booking_confirmation
+Idioma: Spanish (es)
+Categoría: UTILITY
+
+Mensaje:
+Hola {{1}}, tu cita en Pitaya Nails está confirmada para el {{2}} a las {{3}}.
+Servicios: {{4}}
+Total: ${{5}} MXN
+
+¿Necesitas ayuda? Responde a este mensaje.
+```
+
+3. Espera aprobación (usualmente 24 horas)
+
+#### Paso 5: Actualizar Edge Function
+
+El edge function `supabase/functions/send-whatsapp-notification/index.ts` ya está preparado, pero debes:
+
+1. Reemplazar el template name con el aprobado:
+```typescript
+const response = await fetch(
+  `https://graph.facebook.com/v18.0/${phoneNumberId}/messages`,
+  {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      messaging_product: 'whatsapp',
+      to: clientPhone, // Formato: +5219985900050
+      type: 'template',
+      template: {
+        name: 'booking_confirmation', // Tu template aprobado
+        language: { code: 'es' },
+        components: [
+          {
+            type: 'body',
+            parameters: [
+              { type: 'text', text: clientName },
+              { type: 'text', text: bookingDate },
+              { type: 'text', text: bookingTime },
+              { type: 'text', text: services },
+              { type: 'text', text: totalPrice.toString() }
+            ]
+          }
+        ]
+      }
+    })
+  }
+);
+```
+
+#### Paso 6: Testing
+
+1. Deploy el edge function actualizado
+2. Crea una reserva de prueba
+3. Verifica que llegue el mensaje de WhatsApp
+4. Revisa logs en Lovable Cloud → Functions → send-whatsapp-notification
+
+#### Costos de WhatsApp Business API
+
+- **Conversaciones iniciadas por negocio**: ~$0.05 - $0.10 USD por mensaje
+- **Respuestas de usuarios**: Gratis (ventana de 24h)
+- Primer 1,000 conversaciones/mes: **Gratis**
+
+#### Troubleshooting
+
+**Error: "Template not found"**
+- Verifica que el template esté aprobado
+- Usa el nombre exacto del template
+- Confirma que el idioma coincida (es)
+
+**Error: "Phone number not registered"**
+- El número del cliente debe tener WhatsApp instalado
+- Formato debe ser +[código país][número sin espacios]
+
+**Error: "Access token invalid"**
+- Genera un nuevo System User Token
+- Asegúrate de que no haya expirado
+- Verifica permisos correctos
+
+**Mensajes no llegan:**
+- Verifica que Business Verification esté completa
+- Revisa límite de mensajes en Meta Business Suite
+- Confirma que el número no esté bloqueado
+
+#### Alternativa Simple (Sin API)
+
+Si no quieres configurar WhatsApp Business API, la implementación actual funciona bien:
+- Botón flotante genera link pre-llenado
+- Cliente hace click y continúa en WhatsApp
+- Conversación uno-a-uno estándar
 
 ## 🎨 UI Kit
 
@@ -248,6 +405,31 @@ Componentes reutilizables y documentados en `/src/ui-kit/`:
 - **BookingDrawer**: Drawer de reserva móvil
 
 **Documentación completa**: [/src/ui-kit/README.md](./src/ui-kit/README.md)
+
+---
+
+## 💳 Activar Pagos Reales con Stripe
+
+Para cobrar depósitos o pagos completos en reservas, sigue la guía detallada:
+
+**📄 [STRIPE-SETUP.md](./STRIPE-SETUP.md)** - Guía completa paso a paso
+
+**Resumen rápido:**
+1. Crear cuenta en [stripe.com](https://stripe.com)
+2. Activar cuenta con información del negocio
+3. Obtener API keys (test y live)
+4. Habilitar integración en Lovable
+5. Configurar webhooks
+6. Testing con tarjetas de prueba
+7. Activar pagos reales (live mode)
+
+**Costos:** 3.6% + $3 MXN por transacción exitosa
+
+**Casos de Uso:**
+- Cobrar depósito de $200 MXN al reservar
+- Procesar pago completo por adelantado
+- Reducir no-shows significativamente
+- Ofrecer paquetes prepagados
 
 ## ✅ Checklist QA
 
