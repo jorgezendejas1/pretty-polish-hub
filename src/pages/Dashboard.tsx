@@ -28,6 +28,7 @@ import { AnalyticsDashboard } from '@/components/AnalyticsDashboard';
 import { SentimentMetrics } from '@/components/SentimentMetrics';
 import { SecurityMonitor } from '@/components/SecurityMonitor';
 import { LoyaltyCard } from '@/components/LoyaltyCard';
+import { BookingManager } from '@/components/BookingManager';
 import { Star } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
@@ -336,36 +337,29 @@ export default function Dashboard() {
           </TabsList>
 
           <TabsContent value="bookings">
-            {isAdmin && (
-              <Alert className="mb-6 border-primary/20 bg-primary/5">
-                <Info className="h-4 w-4" />
-                <AlertTitle>Sistema Automático de Estados Activo</AlertTitle>
-                <AlertDescription className="space-y-2 text-sm">
-                  <p>El sistema actualiza automáticamente los estados de las reservas cada hora:</p>
-                  <ul className="list-disc list-inside space-y-1 ml-2">
-                    <li><strong>Completado automáticamente:</strong> 2 horas después de la hora programada de la cita</li>
-                    <li><strong>Cancelado automáticamente:</strong> Si la reserva sigue en "Pendiente" 24 horas antes de la cita</li>
-                    <li><strong>Notificación de reseña:</strong> Se envía automáticamente cuando una cita se marca como completada</li>
-                    <li><strong>Programa de lealtad:</strong> Se actualiza automáticamente al completarse una cita (trigger en base de datos)</li>
-                  </ul>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    Puedes cambiar el estado manualmente usando el selector desplegable en la columna "Estado" si es necesario.
-                  </p>
-                </AlertDescription>
-              </Alert>
-            )}
-            <Card className="shadow-elegant">
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold">
-              {isAdmin ? 'Panel de Administración - Todas las Reservas' : 'Mis Reservas'}
-            </CardTitle>
-            {!isAdmin && (
-              <p className="text-muted-foreground">
-                Cuenta: {userEmail}
-              </p>
-            )}
-          </CardHeader>
-          <CardContent>
+            {isAdmin ? (
+              <>
+                <Alert className="mb-6 border-primary/20 bg-primary/5">
+                  <Info className="h-4 w-4" />
+                  <AlertTitle>Sistema Automático de Estados Activo</AlertTitle>
+                  <AlertDescription className="space-y-2 text-sm">
+                    <p>El sistema actualiza automáticamente los estados de las reservas cada hora:</p>
+                    <ul className="list-disc list-inside space-y-1 ml-2">
+                      <li><strong>Completado automáticamente:</strong> 2 horas después de la hora programada de la cita</li>
+                      <li><strong>Cancelado automáticamente:</strong> Si la reserva sigue en "Pendiente" 24 horas antes de la cita</li>
+                      <li><strong>Notificación de reseña:</strong> Se envía automáticamente cuando una cita se marca como completada</li>
+                      <li><strong>Programa de lealtad:</strong> Se actualiza automáticamente al completarse una cita (trigger en base de datos)</li>
+                    </ul>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Puedes cambiar el estado manualmente usando el selector desplegable en la columna "Estado" si es necesario.
+                    </p>
+                  </AlertDescription>
+                </Alert>
+                <Card className="shadow-elegant">
+                  <CardHeader>
+                    <CardTitle className="text-2xl font-bold">Panel de Administración - Todas las Reservas</CardTitle>
+                  </CardHeader>
+                  <CardContent>
             {bookings.length === 0 ? (
               <div className="text-center py-12">
                 <Calendar className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
@@ -602,8 +596,20 @@ export default function Dashboard() {
               </div>
             )}
           </CardContent>
-        </Card>
-        </TabsContent>
+                </Card>
+              </>
+            ) : (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-2xl font-bold">Mis Reservas</CardTitle>
+                  <CardDescription>Gestiona tus citas: visualiza, reagenda o cancela</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <BookingManager />
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
 
         {!isAdmin && (
           <TabsContent value="portfolio">
