@@ -19,6 +19,8 @@ import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import Dashboard from "./pages/Dashboard";
 import Install from "./pages/Install";
+import PaymentSuccess from "./pages/PaymentSuccess";
+import PaymentFailed from "./pages/PaymentFailed";
 
 const queryClient = new QueryClient();
 
@@ -30,8 +32,10 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/auth" element={<Auth />} />
-            <Route element={<Layout />}>
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/success" element={<PaymentSuccess />} />
+          <Route path="/failed" element={<PaymentFailed />} />
+          <Route element={<Layout />}>
               <Route path="/" element={<Index />} />
               <Route path="/servicios" element={<Services />} />
               <Route path="/portafolio" element={<Portfolio />} />

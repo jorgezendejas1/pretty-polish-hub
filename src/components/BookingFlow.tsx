@@ -318,8 +318,14 @@ export const BookingFlow = ({ initialServices, onBack }: BookingFlowProps) => {
       const booking = response.data.booking;
       const bookingToken = response.data.booking_token;
 
-      // Store booking token for future retrieval
+      // Store booking info for payment
       localStorage.setItem(`booking_token_${booking.id}`, bookingToken);
+      localStorage.setItem('pending_payment_booking', JSON.stringify({
+        id: booking.id,
+        amount: totalPrice,
+        customerEmail: bookingState.clientData.email,
+        customerName: bookingState.clientData.name,
+      }));
 
       // Guardar en historial local con token
       const history = JSON.parse(localStorage.getItem('bookingHistory') || '[]');
@@ -334,19 +340,23 @@ export const BookingFlow = ({ initialServices, onBack }: BookingFlowProps) => {
       });
       localStorage.setItem('bookingHistory', JSON.stringify(history));
 
-      // Notifications are now sent automatically from the server
-      // after booking creation (see create-booking edge function)
-
-      setCurrentStep(6);
-      localStorage.removeItem('bookingState');
-
-      // Trigger confetti animation
-      triggerConfetti();
-
-      toast({
-        title: '¡Reserva confirmada!',
-        description: 'Te hemos enviado un correo de confirmación',
-      });
+      // Si el precio es 0 (visita gratis), confirmar directamente
+      if (totalPrice === 0) {
+        setCurrentStep(6);
+        localStorage.removeItem('bookingState');
+        triggerConfetti();
+        toast({
+          title: '¡Reserva confirmada!',
+          description: '¡Felicidades! Esta visita es gratis por tu lealtad.',
+        });
+      } else {
+        // Avanzar al paso de pago
+        setCurrentStep(6);
+        toast({
+          title: 'Reserva creada',
+          description: 'Procede con el pago para confirmar tu reserva',
+        });
+      }
     } catch (error: any) {
       console.error('Error al crear reserva:', error);
       toast({
@@ -391,6 +401,47 @@ END:VCALENDAR`;
     URL.revokeObjectURL(url);
   };
 
+  const handlePayment = async () => {
+    try {
+      const pendingBooking = JSON.parse(localStorage.getItem('pending_payment_booking') || '{}');
+      
+      if (!pendingBooking.id) {
+        throw new Error('No se encontró información de la reserva');
+      }
+
+      setIsSubmitting(true);
+
+      const response = await supabase.functions.invoke('create-checkout-session', {
+        body: {
+          bookingId: pendingBooking.id,
+          amount: pendingBooking.amount,
+          customerEmail: pendingBooking.customerEmail,
+          customerName: pendingBooking.customerName,
+        }
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
+
+      if (response.data?.url) {
+        // Redirect to Stripe Checkout
+        window.location.href = response.data.url;
+      } else {
+        throw new Error('No se recibió URL de pago');
+      }
+    } catch (error: any) {
+      console.error('Error al procesar pago:', error);
+      toast({
+        title: 'Error',
+        description: error.message || 'No se pudo procesar el pago',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const steps = [
     'Personalización',
     'Profesional',
@@ -398,7 +449,7 @@ END:VCALENDAR`;
     'Tus Datos',
     'Revisar',
     'Confirmar',
-    'Confirmado',
+    'Pago',
   ];
 
   const progress = ((currentStep + 1) / steps.length) * 100;
@@ -961,33 +1012,114 @@ END:VCALENDAR`;
         </Card>
       )}
 
-      {/* Paso 6: Confirmado */}
+      {/* Paso 6: Pago */}
       {currentStep === 6 && (
         <Card>
-          <CardContent className="pt-8 pb-8 text-center space-y-6">
-            <div className="flex justify-center">
-              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-                <Check className="h-8 w-8 text-primary" />
+          <CardHeader>
+            <CardTitle className="text-center">Completar Pago</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {totalPrice === 0 ? (
+              // Si es visita gratis, mostrar confirmación
+              <div className="text-center space-y-4">
+                <div className="flex justify-center">
+                  <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center">
+                    <Check className="h-12 w-12 text-green-600" />
+                  </div>
+                </div>
+                <div>
+                  <h2 className="text-2xl font-display font-bold mb-2">¡Reserva Confirmada!</h2>
+                  <p className="text-muted-foreground">
+                    🎉 ¡Esta visita es completamente gratis por tu lealtad!
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Te hemos enviado un correo con todos los detalles.
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Button onClick={downloadICS} variant="outline" className="w-full">
+                    <CalendarIcon className="h-4 w-4 mr-2" />
+                    Añadir al calendario
+                  </Button>
+                  <Button onClick={onBack} className="w-full gradient-primary text-white">
+                    Volver al inicio
+                  </Button>
+                </div>
               </div>
-            </div>
-            <div>
-              <h2 className="text-2xl font-display font-bold mb-2">¡Solicitud enviada!</h2>
-              <p className="text-muted-foreground">
-                Gracias por tu preferencia. Te contactaremos pronto para confirmar tu cita.
-              </p>
-            </div>
-            <div className="space-y-2">
-              <Button onClick={downloadICS} variant="outline" className="w-full">
-                 <CalendarIcon className="h-4 w-4 mr-2" />
-                 Añadir al calendario
-               </Button>
-               <Button onClick={onBack} className="w-full gradient-primary text-white">
-                 Volver al inicio
-               </Button>
-             </div>
-           </CardContent>
-         </Card>
-       )}
+            ) : (
+              // Si hay que pagar, mostrar opciones de pago
+              <>
+                <div className="bg-muted/50 rounded-lg p-6 space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-lg font-semibold">Total a Pagar:</span>
+                    <span className="text-3xl font-bold text-primary">${totalPrice} MXN</span>
+                  </div>
+                  <div className="text-sm text-muted-foreground space-y-1">
+                    <p>• Pago seguro con Stripe</p>
+                    <p>• Acepta tarjetas de crédito y débito</p>
+                    <p>• Transacción encriptada y protegida</p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                    <p className="text-sm text-blue-900 dark:text-blue-100">
+                      <strong>📌 Importante:</strong> Tu reserva ha sido creada pero aún no está confirmada. Completa el pago para confirmar tu cita.
+                    </p>
+                  </div>
+
+                  <Button
+                    onClick={handlePayment}
+                    disabled={isSubmitting}
+                    className="w-full gradient-primary text-white h-12 text-lg"
+                  >
+                    {isSubmitting ? (
+                      <span className="flex items-center gap-2">
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                        Procesando...
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-2">
+                        <DollarSign className="h-5 w-5" />
+                        Pagar con Stripe
+                      </span>
+                    )}
+                  </Button>
+
+                  <p className="text-xs text-center text-muted-foreground">
+                    Al hacer clic serás redirigido a la página segura de Stripe para completar el pago
+                  </p>
+                </div>
+
+                <div className="pt-4 border-t">
+                  <h3 className="font-semibold mb-3 text-sm">Resumen de tu Reserva:</h3>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Fecha:</span>
+                      <span className="font-medium">
+                        {bookingState.selectedDate &&
+                          format(bookingState.selectedDate, "dd/MM/yyyy", { locale: es })}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Hora:</span>
+                      <span className="font-medium">{bookingState.selectedTime}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Profesional:</span>
+                      <span className="font-medium">{bookingState.selectedProfessional?.name}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Duración:</span>
+                      <span className="font-medium">{totalDuration} min</span>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+          </CardContent>
+        </Card>
+      )}
      </motion.div>
      </AnimatePresence>
    );
