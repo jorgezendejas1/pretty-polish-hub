@@ -1,4 +1,6 @@
 import { Service } from '@/types';
+import { motion } from 'framer-motion';
+import { useState } from 'react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
 import { Clock, DollarSign } from 'lucide-react';
@@ -11,19 +13,55 @@ interface ServiceCardProps {
 }
 
 export const ServiceCard = ({ service, onBook, isSelected, onToggleSelect }: ServiceCardProps) => {
+  const [rotateX, setRotateX] = useState(0);
+  const [rotateY, setRotateY] = useState(0);
+
   const handleClick = () => {
     if (onToggleSelect) {
       onToggleSelect(service.id);
     }
   };
 
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const card = e.currentTarget;
+    const rect = card.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    const rotateXVal = ((y - centerY) / centerY) * -10;
+    const rotateYVal = ((x - centerX) / centerX) * 10;
+    setRotateX(rotateXVal);
+    setRotateY(rotateYVal);
+  };
+
+  const handleMouseLeave = () => {
+    setRotateX(0);
+    setRotateY(0);
+  };
+
   return (
-    <Card
-      className={`overflow-hidden transition-smooth hover:shadow-elegant cursor-pointer animate-fade-in ${
-        isSelected ? 'ring-2 ring-primary shadow-elegant' : ''
-      }`}
-      onClick={handleClick}
+    <motion.div
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      whileHover={{ scale: 1.02 }}
+      style={{
+        transformStyle: 'preserve-3d',
+        perspective: 1000,
+      }}
+      animate={{
+        rotateX,
+        rotateY,
+      }}
+      transition={{ type: 'spring', stiffness: 300, damping: 20 }}
     >
+      <Card
+        className={`overflow-hidden transition-smooth hover:shadow-elegant cursor-pointer animate-fade-in ${
+          isSelected ? 'ring-2 ring-primary shadow-elegant' : ''
+        }`}
+        onClick={handleClick}
+        style={{ transformStyle: 'preserve-3d' }}
+      >
       <div className="relative h-32 sm:h-40 md:h-48 overflow-hidden">
         <img
           src={service.imageUrl}
@@ -86,5 +124,6 @@ export const ServiceCard = ({ service, onBook, isSelected, onToggleSelect }: Ser
         )}
       </CardFooter>
     </Card>
+    </motion.div>
   );
 };
