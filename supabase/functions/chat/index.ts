@@ -275,7 +275,9 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
+    const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey);
     
     const clientIP = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
     const rateLimitPassed = await checkRateLimit(supabase, clientIP);
@@ -316,6 +318,15 @@ serve(async (req) => {
     }
     
     if (lastMessage.content.length > 1000) {
+      // Registrar evento de seguridad
+      await supabaseAdmin.from('security_logs').insert({
+        ip_address: clientIP,
+        event_type: 'length_exceeded',
+        message: `Mensaje excede límite de 1000 caracteres (${lastMessage.content.length})`,
+        blocked: true,
+        user_message: lastMessage.content.substring(0, 200) + '...'
+      });
+      
       return new Response(
         JSON.stringify({ error: 'El mensaje es demasiado largo. Por favor limita tu mensaje a 1000 caracteres.' }),
         {
@@ -348,6 +359,18 @@ serve(async (req) => {
     
     if (hasSuspiciousContent) {
       console.warn(`[SECURITY] Prompt injection attempt detected from IP ${clientIP}`);
+      
+      // Registrar evento de seguridad
+      const detectedPattern = suspiciousPatterns.find(pattern => pattern.test(lastMessage.content));
+      await supabaseAdmin.from('security_logs').insert({
+        ip_address: clientIP,
+        event_type: 'prompt_injection',
+        message: `Patrón de inyección detectado: ${detectedPattern?.source || 'desconocido'}`,
+        blocked: true,
+        user_message: lastMessage.content.substring(0, 500),
+        metadata: { pattern: detectedPattern?.toString() }
+      });
+      
       return new Response(
         JSON.stringify({ 
           error: 'Contenido no permitido detectado. Por favor reformula tu mensaje.' 
@@ -363,6 +386,17 @@ serve(async (req) => {
     const specialCharCount = (lastMessage.content.match(/[<>{}[\]\\|`]/g) || []).length;
     if (specialCharCount > 10) {
       console.warn(`[SECURITY] Excessive special characters from IP ${clientIP}`);
+      
+      // Registrar evento de seguridad
+      await supabaseAdmin.from('security_logs').insert({
+        ip_address: clientIP,
+        event_type: 'special_chars',
+        message: `Caracteres especiales excesivos: ${specialCharCount} encontrados`,
+        blocked: true,
+        user_message: lastMessage.content.substring(0, 500),
+        metadata: { special_char_count: specialCharCount }
+      });
+      
       return new Response(
         JSON.stringify({ 
           error: 'Demasiados caracteres especiales en el mensaje.' 

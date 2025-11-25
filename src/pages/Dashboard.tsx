@@ -26,6 +26,7 @@ import { PortfolioUpload } from '@/components/PortfolioUpload';
 import { PortfolioApproval } from '@/components/PortfolioApproval';
 import { AnalyticsDashboard } from '@/components/AnalyticsDashboard';
 import { SentimentMetrics } from '@/components/SentimentMetrics';
+import { SecurityMonitor } from '@/components/SecurityMonitor';
 import { LoyaltyCard } from '@/components/LoyaltyCard';
 import { Star } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -325,12 +326,13 @@ export default function Dashboard() {
         {!isAdmin && <LoyaltyCard />}
 
         <Tabs defaultValue="bookings" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5">
+          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-6">
             <TabsTrigger value="bookings">Reservas</TabsTrigger>
             {!isAdmin && <TabsTrigger value="portfolio">Subir Fotos</TabsTrigger>}
             {isAdmin && <TabsTrigger value="portfolio-approval">Aprobar Fotos</TabsTrigger>}
             {isAdmin && <TabsTrigger value="analytics">Analíticas</TabsTrigger>}
             {isAdmin && <TabsTrigger value="sentiment">Satisfacción</TabsTrigger>}
+            {isAdmin && <TabsTrigger value="security">Seguridad</TabsTrigger>}
           </TabsList>
 
           <TabsContent value="bookings">
@@ -624,6 +626,12 @@ export default function Dashboard() {
         {isAdmin && (
           <TabsContent value="sentiment">
             <SentimentMetrics />
+          </TabsContent>
+        )}
+
+        {isAdmin && (
+          <TabsContent value="security">
+            <SecurityMonitor />
           </TabsContent>
         )}
       </Tabs>

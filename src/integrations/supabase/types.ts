@@ -323,6 +323,39 @@ export type Database = {
           },
         ]
       }
+      security_logs: {
+        Row: {
+          blocked: boolean
+          created_at: string
+          event_type: string
+          id: string
+          ip_address: string
+          message: string
+          metadata: Json | null
+          user_message: string | null
+        }
+        Insert: {
+          blocked?: boolean
+          created_at?: string
+          event_type: string
+          id?: string
+          ip_address: string
+          message: string
+          metadata?: Json | null
+          user_message?: string | null
+        }
+        Update: {
+          blocked?: boolean
+          created_at?: string
+          event_type?: string
+          id?: string
+          ip_address?: string
+          message?: string
+          metadata?: Json | null
+          user_message?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -401,6 +434,7 @@ export type Database = {
       }
       cleanup_chat_rate_limits: { Args: never; Returns: undefined }
       cleanup_old_rate_limits: { Args: never; Returns: undefined }
+      cleanup_old_security_logs: { Args: never; Returns: undefined }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
