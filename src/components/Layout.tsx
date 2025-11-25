@@ -4,6 +4,8 @@ import { Header } from './Header';
 import { Footer } from './Footer';
 import { WhatsAppButton } from './WhatsAppButton';
 import { StickyCTA } from './StickyCTA';
+import { MobileStickyCTA } from './MobileStickyCTA';
+import { PWAUpdatePrompt } from './PWAUpdatePrompt';
 
 export const Layout = () => {
   const location = useLocation();
@@ -21,6 +23,8 @@ export const Layout = () => {
       <Footer />
       <WhatsAppButton />
       <StickyCTA />
+      <MobileStickyCTA />
+      <PWAUpdatePrompt />
     </div>
   );
 };

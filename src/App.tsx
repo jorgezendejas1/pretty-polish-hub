@@ -17,6 +17,7 @@ import ImageEditor from "./pages/ImageEditor";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import Dashboard from "./pages/Dashboard";
+import Install from "./pages/Install";
 
 const queryClient = new QueryClient();
 
@@ -39,6 +40,7 @@ const App = () => (
             <Route path="/editor" element={<ImageEditor />} />
             <Route path="/contacto" element={<Contact />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/instalar" element={<Install />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
