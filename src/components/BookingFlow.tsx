@@ -517,7 +517,7 @@ END:VCALENDAR`;
                               const filePath = `${fileName}`;
 
                               const { error: uploadError } = await supabase.storage
-                                .from('design-inspirations')
+                                .from('client-inspirations')
                                 .upload(filePath, file);
 
                               if (uploadError) {
@@ -530,9 +530,9 @@ END:VCALENDAR`;
                                 continue;
                               }
 
-                              // Generate signed URL (valid for 1 year for booking references)
+                              // Generate signed URL from private bucket (valid for 1 year)
                               const { data: signedUrlData, error: urlError } = await supabase.storage
-                                .from('design-inspirations')
+                                .from('client-inspirations')
                                 .createSignedUrl(filePath, 31536000); // 1 year validity
 
                               if (urlError || !signedUrlData) {

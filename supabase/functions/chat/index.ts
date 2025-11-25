@@ -24,14 +24,14 @@ const TEAM = [
   { id: 'ana', name: 'Ana', role: 'Manicurista', specialty: 'Manicura y Pedicura Spa', unavailableDays: [0] },
 ];
 
-// Rate limiting helper
+// Rate limiting helper - AGRESIVO: 10 mensajes cada 5 minutos
 const checkRateLimit = async (supabase: any, identifier: string): Promise<boolean> => {
   try {
     const { data, error } = await supabase.rpc('check_rate_limit', {
       p_identifier: identifier,
       p_endpoint: 'chat',
-      p_max_requests: 30,
-      p_window_seconds: 3600
+      p_max_requests: 10, // Reducido de 30 a 10
+      p_window_seconds: 300 // Reducido de 3600 (1 hora) a 300 (5 minutos)
     });
     
     if (error) {
@@ -325,13 +325,21 @@ serve(async (req) => {
       );
     }
     
-    // Basic sanitization - remove suspicious patterns
+    // VALIDACIÓN MEJORADA: Detectar y bloquear inyección de prompts
     const suspiciousPatterns = [
-      /ignore\s+(previous|all)\s+instructions?/i,
+      /ignore\s+(previous|all|above|prior)\s+(instructions?|commands?|prompts?)/i,
       /system\s*:\s*/i,
       /you\s+are\s+now\s+/i,
       /\[system\]/i,
       /\<system\>/i,
+      /forget\s+(everything|all|previous)/i,
+      /new\s+(instructions?|role|personality)/i,
+      /act\s+as\s+if/i,
+      /pretend\s+(to\s+be|you\s+are)/i,
+      /override\s+(instructions?|settings?)/i,
+      /disregard\s+(previous|all)/i,
+      /\\x[0-9a-f]{2}/i, // Detectar caracteres escapados hex
+      /%[0-9a-f]{2}/i, // Detectar URL encoding sospechoso
     ];
     
     const hasSuspiciousContent = suspiciousPatterns.some(pattern => 
@@ -339,8 +347,31 @@ serve(async (req) => {
     );
     
     if (hasSuspiciousContent) {
-      console.warn(`Suspicious content detected from IP ${clientIP}`);
-      // Don't block, but log for monitoring
+      console.warn(`[SECURITY] Prompt injection attempt detected from IP ${clientIP}`);
+      return new Response(
+        JSON.stringify({ 
+          error: 'Contenido no permitido detectado. Por favor reformula tu mensaje.' 
+        }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
+    }
+    
+    // Validación adicional: detectar exceso de caracteres especiales
+    const specialCharCount = (lastMessage.content.match(/[<>{}[\]\\|`]/g) || []).length;
+    if (specialCharCount > 10) {
+      console.warn(`[SECURITY] Excessive special characters from IP ${clientIP}`);
+      return new Response(
+        JSON.stringify({ 
+          error: 'Demasiados caracteres especiales en el mensaje.' 
+        }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
     }
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     
