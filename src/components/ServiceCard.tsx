@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
 import { Clock, DollarSign } from 'lucide-react';
+import { OptimizedImage } from './OptimizedImage';
+import { RippleButton } from './RippleButton';
 
 interface ServiceCardProps {
   service: Service;
@@ -63,13 +65,17 @@ export const ServiceCard = ({ service, onBook, isSelected, onToggleSelect }: Ser
         style={{ transformStyle: 'preserve-3d' }}
       >
       <div className="relative h-32 sm:h-40 md:h-48 overflow-hidden">
-        <img
+        <OptimizedImage
           src={service.imageUrl}
           alt={service.name}
-          className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
+          className="w-full h-full"
         />
         {isSelected && (
-          <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-primary flex items-center justify-center">
+          <motion.div 
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            className="absolute top-2 right-2 w-6 h-6 rounded-full bg-primary flex items-center justify-center"
+          >
             <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
               <path
                 fillRule="evenodd"
@@ -77,7 +83,7 @@ export const ServiceCard = ({ service, onBook, isSelected, onToggleSelect }: Ser
                 clipRule="evenodd"
               />
             </svg>
-          </div>
+          </motion.div>
         )}
       </div>
       <CardHeader className="p-3 sm:p-4 md:p-6">
@@ -98,7 +104,7 @@ export const ServiceCard = ({ service, onBook, isSelected, onToggleSelect }: Ser
       </CardContent>
       <CardFooter className="p-3 sm:p-4 md:p-6 pt-0">
         {onToggleSelect ? (
-          <Button
+          <RippleButton
             onClick={(e) => {
               e.stopPropagation();
               handleClick();
@@ -110,9 +116,9 @@ export const ServiceCard = ({ service, onBook, isSelected, onToggleSelect }: Ser
             }`}
           >
             {isSelected ? 'Quitar selección' : 'Seleccionar'}
-          </Button>
+          </RippleButton>
         ) : (
-          <Button
+          <RippleButton
             onClick={(e) => {
               e.stopPropagation();
               onBook(service.id);
@@ -120,7 +126,7 @@ export const ServiceCard = ({ service, onBook, isSelected, onToggleSelect }: Ser
             className="w-full gradient-primary text-white text-xs sm:text-sm"
           >
             Reservar ahora
-          </Button>
+          </RippleButton>
         )}
       </CardFooter>
     </Card>

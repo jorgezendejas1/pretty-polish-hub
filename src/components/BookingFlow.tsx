@@ -13,6 +13,8 @@ import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { format, addDays, setHours, setMinutes } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { motion, AnimatePresence } from 'framer-motion';
+import confetti from 'canvas-confetti';
 
 interface BookingFlowProps {
   initialServices: Service[];
@@ -264,6 +266,14 @@ export const BookingFlow = ({ initialServices, onBack }: BookingFlowProps) => {
     }
   };
 
+  const triggerConfetti = () => {
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 }
+    });
+  };
+
   const handleSubmit = async () => {
     setIsSubmitting(true);
     try {
@@ -330,6 +340,9 @@ export const BookingFlow = ({ initialServices, onBack }: BookingFlowProps) => {
       setCurrentStep(6);
       localStorage.removeItem('bookingState');
 
+      // Trigger confetti animation
+      triggerConfetti();
+
       toast({
         title: '¡Reserva confirmada!',
         description: 'Te hemos enviado un correo de confirmación',
@@ -391,7 +404,15 @@ END:VCALENDAR`;
   const progress = ((currentStep + 1) / steps.length) * 100;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
+    <AnimatePresence mode="wait">
+      <motion.div 
+        key={currentStep}
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: -20 }}
+        transition={{ duration: 0.3 }}
+        className="max-w-4xl mx-auto px-4 py-8"
+      >
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-3xl font-display font-bold">Reserva tu Cita</h2>
@@ -957,16 +978,17 @@ END:VCALENDAR`;
             </div>
             <div className="space-y-2">
               <Button onClick={downloadICS} variant="outline" className="w-full">
-                <CalendarIcon className="h-4 w-4 mr-2" />
-                Añadir al calendario
-              </Button>
-              <Button onClick={onBack} className="w-full gradient-primary text-white">
-                Volver al inicio
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-    </div>
-  );
-};
+                 <CalendarIcon className="h-4 w-4 mr-2" />
+                 Añadir al calendario
+               </Button>
+               <Button onClick={onBack} className="w-full gradient-primary text-white">
+                 Volver al inicio
+               </Button>
+             </div>
+           </CardContent>
+         </Card>
+       )}
+     </motion.div>
+     </AnimatePresence>
+   );
+ };
