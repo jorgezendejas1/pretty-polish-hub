@@ -72,14 +72,14 @@ export const PortfolioUpload = () => {
       const filePath = `portfolio-submissions/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
-        .from('design-inspirations')
+        .from('client-inspirations')
         .upload(filePath, selectedFile);
 
       if (uploadError) throw uploadError;
 
-      // Generate signed URL (valid for 1 year for portfolio submissions)
+      // Generate signed URL from private bucket (valid for 1 year)
       const { data: signedUrlData, error: urlError } = await supabase.storage
-        .from('design-inspirations')
+        .from('client-inspirations')
         .createSignedUrl(filePath, 31536000); // 1 year validity
 
       if (urlError || !signedUrlData) {

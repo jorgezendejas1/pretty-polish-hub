@@ -399,6 +399,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      cleanup_chat_rate_limits: { Args: never; Returns: undefined }
       cleanup_old_rate_limits: { Args: never; Returns: undefined }
       has_role: {
         Args: {
